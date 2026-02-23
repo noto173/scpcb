@@ -4320,7 +4320,7 @@ Function UpdateEvents()
 							PointEntity e\room\NPC[0]\Collider, Curr096\Collider
 						ElseIf e\EventState >= 70*10 And e\EventState < 70*20
 							Curr096\State=Min(Max(1,Curr096\State),3)
-							Curr096\State2=Max(Curr096\State2,70*12)
+							Curr096\State2=Max(Curr096\State2,70*9.1)
 							If e\EventState-FPSfactor =< 70*15 Then ;walk to the doorway
 								If e\EventState > 70*15 Then
 									e\room\NPC[0]\State=14
@@ -4346,7 +4346,6 @@ Function UpdateEvents()
 								If PlayerRoom = e\room Then LightBlink = (e\room\NPC[0]\Reload)+Rnd(0.5,2.0)
 								Curr096\Target = e\room\NPC[0]
 							Else
-								If e\EventState>70*22 Then Curr096\State = 4
 								If e\room\NPC[0]\State=13 Then
 									e\room\NPC[0]\State=14
 									e\room\NPC[0]\PathStatus = FindPath(e\room\NPC[0], EntityX(e\room\obj,True),0.4,EntityZ(e\room\obj,True))
@@ -4355,6 +4354,8 @@ Function UpdateEvents()
 								EndIf
 							EndIf
 						EndIf
+
+						DebugLog((18-Curr096\State2/70) + "  " + (22-e\EventState/70))
 						
 						If AnimTime(Curr096\obj)>25 And AnimTime(Curr096\obj)<150 Then
 							FreeSound_Strict e\Sound : e\Sound = 0
