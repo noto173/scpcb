@@ -3003,7 +3003,7 @@ While IsRunning
 		
 		If (Not MouseDown1) And (Not MouseHit1) Then GrabbedEntity = 0
 	Else
-		Input_ResetTime = Max(Input_ResetTime-FPSfactor,0.0)
+		Input_ResetTime = Max(Input_ResetTime-FPSfactor2,0.0)
 	EndIf
 	
 	UpdateMusic()
