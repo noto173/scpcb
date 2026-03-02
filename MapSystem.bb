@@ -1841,6 +1841,8 @@ Function UpdateGrid(grid.Grids)
 	Next
 End Function
 
+Const MT_HEIGHT# = 16.0
+
 Function PlaceGrid_MapCreator(r.Rooms)
 	Local x,y,i
 	Local Meshes[7]
@@ -1864,44 +1866,44 @@ Function PlaceGrid_MapCreator(r.Rooms)
 				Local tile_entity = CopyEntity(Meshes[tile_type-1])
 				RotateEntity tile_entity,0,angle,0
 				ScaleEntity tile_entity,RoomScale,RoomScale,RoomScale,True
-				PositionEntity tile_entity,r\x+x*2.0,8.0,r\z+y*2.0,True
+				PositionEntity tile_entity,r\x+x*2.0,MT_HEIGHT,r\z+y*2.0,True
 				
 				Select r\grid\grid[x+(y*gridsz)]
 					Case ROOM1, ROOM2
-						AddLight%(Null, r\x+x*2.0, 8.0+(372.0*RoomScale), r\z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
+						AddLight%(Null, r\x+x*2.0, MT_HEIGHT+(372.0*RoomScale), r\z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					Case ROOM2C,ROOM3,ROOM4
-						AddLight%(Null,r\x+x*2.0, 8.0+(416.0*RoomScale), r\z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
+						AddLight%(Null,r\x+x*2.0, MT_HEIGHT+(416.0*RoomScale), r\z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					Case ROOM4+1
-						dr=CreateDoor(r\zone,r\x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*240.0*RoomScale),8.0,r\z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*240.0*RoomScale),EntityYaw(tile_entity,True)+90.0,Null,False,3,False,"")
+						dr=CreateDoor(r\zone,r\x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*240.0*RoomScale),MT_HEIGHT,r\z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*240.0*RoomScale),EntityYaw(tile_entity,True)+90.0,Null,False,3,False,"")
 						PositionEntity dr\buttons[0],EntityX(dr\buttons[0],True)+(Cos(EntityYaw(tile_entity,True))*0.05),EntityY(dr\buttons[0],True)+0.0,EntityZ(dr\buttons[0],True)+(Sin(EntityYaw(tile_entity,True))*0.05),True
 						
-						AddLight%(Null, r\x+x*2.0+(Cos(EntityYaw(tile_entity,True))*555.0*RoomScale), 8.0+(469.0*RoomScale), r\z+y*2.0+(Sin(EntityYaw(tile_entity,True))*555.0*RoomScale), 2, 600.0 * RoomScale, 255, 255, 255)
+						AddLight%(Null, r\x+x*2.0+(Cos(EntityYaw(tile_entity,True))*555.0*RoomScale), MT_HEIGHT+(469.0*RoomScale), r\z+y*2.0+(Sin(EntityYaw(tile_entity,True))*555.0*RoomScale), 2, 600.0 * RoomScale, 255, 255, 255)
 						
 						Local tempInt2=CreatePivot()
 						RotateEntity tempInt2,0,EntityYaw(tile_entity,True)+180.0,0,True
-						PositionEntity tempInt2,r\x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*552.0*RoomScale),8.0+(240.0*RoomScale),r\z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*552.0*RoomScale)
+						PositionEntity tempInt2,r\x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*552.0*RoomScale),MT_HEIGHT+(240.0*RoomScale),r\z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*552.0*RoomScale)
 						If r\RoomDoors[1]=Null Then
 							r\RoomDoors[1]=dr
 							r\Objects[3]=tempInt2
-							PositionEntity r\Objects[0],r\x+x*2.0,8.0,r\z+y*2.0,True
+							PositionEntity r\Objects[0],r\x+x*2.0,MT_HEIGHT,r\z+y*2.0,True
 							DebugLog "Created door 1 successfully!"
 						ElseIf r\RoomDoors[1]<>Null And r\RoomDoors[3]=Null Then
 							r\RoomDoors[3]=dr
 							r\Objects[5]=tempInt2
-							PositionEntity r\Objects[1],r\x+x*2.0,8.0,r\z+y*2.0,True
+							PositionEntity r\Objects[1],r\x+x*2.0,MT_HEIGHT,r\z+y*2.0,True
 							DebugLog "Created door 2 successfully!"
 						EndIf
 					Case ROOM4+2
-						AddLight%(Null, r\x+x*2.0-(Sin(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,True))*16.0*RoomScale), 8.0+(396.0*RoomScale), r\z+y*2.0+(Cos(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,True))*16.0*RoomScale), 2, 500.0 * RoomScale, 255, 200, 200)
-						it = CreateItem("scp500",r\x+x*2.0+(Cos(EntityYaw(tile_entity,True))*(-208.0)*RoomScale)-(Sin(EntityYaw(tile_entity,True))*1226.0*RoomScale),8.0+(80.0*RoomScale),r\z+y*2.0+(Sin(EntityYaw(tile_entity,True))*(-208.0)*RoomScale)+(Cos(EntityYaw(tile_entity,True))*1226.0*RoomScale))
+						AddLight%(Null, r\x+x*2.0-(Sin(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,True))*16.0*RoomScale), MT_HEIGHT+(396.0*RoomScale), r\z+y*2.0+(Cos(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,True))*16.0*RoomScale), 2, 500.0 * RoomScale, 255, 200, 200)
+						it = CreateItem("scp500",r\x+x*2.0+(Cos(EntityYaw(tile_entity,True))*(-208.0)*RoomScale)-(Sin(EntityYaw(tile_entity,True))*1226.0*RoomScale),MT_HEIGHT+(80.0*RoomScale),r\z+y*2.0+(Sin(EntityYaw(tile_entity,True))*(-208.0)*RoomScale)+(Cos(EntityYaw(tile_entity,True))*1226.0*RoomScale))
 						EntityType (it\collider, HIT_ITEM)
 						
-						it = CreateItem("nvgoggles",r\x+x*2.0-(Sin(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,True))*16.0*RoomScale), 8.0+(80.0*RoomScale), r\z+y*2.0+(Cos(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,True))*16.0*RoomScale))
+						it = CreateItem("nvgoggles",r\x+x*2.0-(Sin(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,True))*16.0*RoomScale), MT_HEIGHT+(80.0*RoomScale), r\z+y*2.0+(Cos(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,True))*16.0*RoomScale))
 						EntityType (it\collider, HIT_ITEM)
 				End Select
 				
 				r\grid\Entities[x+(y*gridsz)]=tile_entity
-				wayp.WayPoints = CreateWaypoint(r\x+(x*2.0),8.2,r\z+(y*2.0),Null,r)
+				wayp.WayPoints = CreateWaypoint(r\x+(x*2.0),MT_HEIGHT+0.2,r\z+(y*2.0),Null,r)
 				r\grid\waypoints[x+(y*gridsz)]=wayp
 				
 				If y<gridsz-1 Then
