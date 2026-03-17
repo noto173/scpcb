@@ -11767,7 +11767,7 @@ Function IsItemGoodFor1162(itt.ItemTemplates)
 	If itt\group = "paper" Then
 		;if the item is a paper, only allow spawning it if the name contains the word "note" or "log"
 		;(because those are items created recently, which D-9341 has most likely never seen)
-		Return ((Not Instr(itt\name, "note")) And (Not Instr(itt\name, "log"))) And (Not Instr(itt\name, "docL")) And itt\name <> "docDan" And itt\name <> "docStrange" And itt\name <> "doc106_2" And itt\name <> "leaflet"
+		Return ((Not Instr(itt\name, "note")) And (Not Instr(itt\name, "log"))) And (Not Instr(itt\name, "docL")) And itt\name <> "docDan" And itt\name <> "docStrange" And itt\name <> "doc106_2" And itt\name <> "leaflet" And itt\name <> "drawing"
 	EndIf
 	Select itt\name
 		Case "key1", "key2", "key3"
