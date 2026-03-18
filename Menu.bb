@@ -2305,10 +2305,17 @@ Function RowText(A$, X, Y, W, H, align% = 0, Leading#=1)
 	Local LinesShown = 0
 	Local Height = StringHeight(A$) + Leading
 	Local b$
+	Local hasSpace% = Instr(A, " ") <> 0
 	
 	While Len(A) > 0
 		Local space = Instr(A$, " ")
-		If space = 0 Then space = Len(A$) + 1
+		If space = 0 Then
+			If hasSpace Then
+				space = Len(A$) + 1
+			Else
+				space = 2
+			EndIf
+		EndIf
 		Local temp$ = Left(A$, space - 1)
 		
 		If StringWidth (b$ + temp$) > W Then ;too big, so Print what will fit
@@ -2321,9 +2328,9 @@ Function RowText(A$, X, Y, W, H, align% = 0, Leading#=1)
 			LinesShown = LinesShown + 1
 			b$=""
 		Else ;append it To b$ (which will eventually be printed) And remove it from A$
-			If b <> "" Then b = b + " "
+			If b <> "" And hasSpace Then b = b + " "
 			b$ = b$ + temp$
-			A$ = Right(A$, Max(0, Len(A$) - Len(temp$) - 1))
+			A$ = Right(A$, Max(0, Len(A$) - Len(temp$) - hasSpace))
 		EndIf
 		
 		If ((LinesShown + 1) * Height) > H Then Exit ;the Next Line would be too tall, so leave
@@ -2348,19 +2355,26 @@ Function GetLineAmount(A$, W, H, Leading#=1)
 	Local LinesShown = 0
 	Local Height = StringHeight(A$) + Leading
 	Local b$
+	Local hasSpace% = Instr(A, " ") <> 0
 
 	While Len(A) > 0
 		Local space = Instr(A$, " ")
-		If space = 0 Then space = Len(A$) + 1
+		If space = 0 Then
+			If hasSpace Then
+				space = Len(A$) + 1
+			Else
+				space = 2
+			EndIf
+		EndIf
 		Local temp$ = Left(A$, space - 1)
 		
 		If StringWidth (b$ + temp$) > W Then ;too big, so Print what will fit
 			LinesShown = LinesShown + 1
 			b$=""
 		Else ;append it To b$ (which will eventually be printed) And remove it from A$
-			If b <> "" Then b = b + " "
+			If b <> "" And hasSpace Then b = b + " "
 			b$ = b$ + temp$
-			A$ = Right(A$, Max(0, Len(A$) - Len(temp$) - 1))
+			A$ = Right(A$, Max(0, Len(A$) - Len(temp$) - hasSpace))
 		EndIf
 		
 		If ((LinesShown + 1) * Height) > H Then Exit ;the Next Line would be too tall, so leave
