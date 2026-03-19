@@ -1581,8 +1581,6 @@ Function UpdateLauncher()
 		GfxDrivers(i) = GfxDriverName(i)
 	Next
 	
-	BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
-	
 	AppTitle "SCP - Containment Breach Launcher"
 
 	Local quit% = False
@@ -1978,7 +1976,7 @@ Function DrawLoading(percent%, shortloading=False)
 		
 		DrawImage SelectedLoadingScreen\img, x, y
 		
-		DrawBar(BlinkMeterIMG, GraphicWidth / 2, GraphicHeight / 2 - 70 * MenuScale, 300 * HUDScale, percent / 100.0, True)
+		DrawBar(MenuMeterIMG, GraphicWidth / 2, GraphicHeight / 2 - 70 * MenuScale, 300 * MenuScale, percent / 100.0, True)
 		
 		If SelectedLoadingScreen\title = "CWM" Then
 			
@@ -2282,12 +2280,12 @@ Function SlideBar#(x%, y%, width%, value#, ID%)
 		value = Min(Max((ScaledMouseX() - x) * 100 / width, 0), 100)
 	EndIf
 
-	Local height% = ImageHeight(BlinkMeterIMG) + 6
+	Local height% = ImageHeight(MenuMeterIMG) + 6
 
 	Color 255,255,255
 	Rect(x, y, width + 14, height,False)
 
-	DrawImage(BlinkMeterIMG, x + width * value / 100.0 +3, y+3)
+	DrawImage(MenuMeterIMG, x + width * value / 100.0 +3, y+3)
 	
 	Color 170,170,170 
 	Text (x - 20 * MenuScale - StringWidth(I_Loc\Option_SliderLow), y + 3*MenuScale, I_Loc\Option_SliderLow)					
@@ -2666,11 +2664,11 @@ Function Slider3(x%,y%,width%,value%,ID%,val1$,val2$,val3$)
 	EndIf
 	
 	If value = 0
-		DrawImage(BlinkMeterIMG,x,y-8)
+		DrawImage(MenuMeterIMG,x,y-8)
 	ElseIf value = 1
-		DrawImage(BlinkMeterIMG,x+(width/2)+3,y-8)
+		DrawImage(MenuMeterIMG,x+(width/2)+3,y-8)
 	Else
-		DrawImage(BlinkMeterIMG,x+width+6,y-8)
+		DrawImage(MenuMeterIMG,x+width+6,y-8)
 	EndIf
 	
 	Color 170,170,170
@@ -2721,13 +2719,13 @@ Function Slider4(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$)
 	EndIf
 	
 	If value = 0
-		DrawImage(BlinkMeterIMG,x,y-8)
+		DrawImage(MenuMeterIMG,x,y-8)
 	ElseIf value = 1
-		DrawImage(BlinkMeterIMG,x+width*(1.0/3.0)+2,y-8)
+		DrawImage(MenuMeterIMG,x+width*(1.0/3.0)+2,y-8)
 	ElseIf value = 2
-		DrawImage(BlinkMeterIMG,x+width*(2.0/3.0)+4,y-8)
+		DrawImage(MenuMeterIMG,x+width*(2.0/3.0)+4,y-8)
 	Else
-		DrawImage(BlinkMeterIMG,x+width+6,y-8)
+		DrawImage(MenuMeterIMG,x+width+6,y-8)
 	EndIf
 	
 	Color 170,170,170
@@ -2783,15 +2781,15 @@ Function Slider5(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$)
 	EndIf
 	
 	If value = 0
-		DrawImage(BlinkMeterIMG,x,y-8)
+		DrawImage(MenuMeterIMG,x,y-8)
 	ElseIf value = 1
-		DrawImage(BlinkMeterIMG,x+(width/4)+1.5,y-8)
+		DrawImage(MenuMeterIMG,x+(width/4)+1.5,y-8)
 	ElseIf value = 2
-		DrawImage(BlinkMeterIMG,x+(width/2)+3,y-8)
+		DrawImage(MenuMeterIMG,x+(width/2)+3,y-8)
 	ElseIf value = 3
-		DrawImage(BlinkMeterIMG,x+(width*0.75)+4.5,y-8)
+		DrawImage(MenuMeterIMG,x+(width*0.75)+4.5,y-8)
 	Else
-		DrawImage(BlinkMeterIMG,x+width+6,y-8)
+		DrawImage(MenuMeterIMG,x+width+6,y-8)
 	EndIf
 	
 	Color 170,170,170
@@ -2855,19 +2853,19 @@ Function Slider7(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$,val6$,val
 	EndIf
 	
 	If value = 0
-		DrawImage(BlinkMeterIMG,x,y-8)
+		DrawImage(MenuMeterIMG,x,y-8)
 	ElseIf value = 1
-		DrawImage(BlinkMeterIMG,x+(width*(1.0/6.0))+1,y-8)
+		DrawImage(MenuMeterIMG,x+(width*(1.0/6.0))+1,y-8)
 	ElseIf value = 2
-		DrawImage(BlinkMeterIMG,x+(width*(2.0/6.0))+2,y-8)
+		DrawImage(MenuMeterIMG,x+(width*(2.0/6.0))+2,y-8)
 	ElseIf value = 3
-		DrawImage(BlinkMeterIMG,x+(width*(3.0/6.0))+3,y-8)
+		DrawImage(MenuMeterIMG,x+(width*(3.0/6.0))+3,y-8)
 	ElseIf value = 4
-		DrawImage(BlinkMeterIMG,x+(width*(4.0/6.0))+4,y-8)
+		DrawImage(MenuMeterIMG,x+(width*(4.0/6.0))+4,y-8)
 	ElseIf value = 5
-		DrawImage(BlinkMeterIMG,x+(width*(5.0/6.0))+5,y-8)
+		DrawImage(MenuMeterIMG,x+(width*(5.0/6.0))+5,y-8)
 	Else
-		DrawImage(BlinkMeterIMG,x+width+6,y-8)
+		DrawImage(MenuMeterIMG,x+width+6,y-8)
 	EndIf
 	
 	Color 170,170,170

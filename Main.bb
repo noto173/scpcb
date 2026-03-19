@@ -322,6 +322,13 @@ ConsoleFont% = Font1
 SetFont Font2
 
 Global BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
+Global MenuMeterIMG%
+If HUDScale = MenuScale Then
+	MenuMeterIMG = BlinkMeterIMG
+Else
+	MenuMeterIMG = LoadImage_Strict("GFX\blinkmeter.jpg")
+	ScaleImage(MenuMeterIMG, MenuScale, MenuScale)
+EndIf
 ScaleImage(BlinkMeterIMG, HUDScale, HUDScale)
 
 DrawLoading(0, True)
