@@ -51,6 +51,7 @@ Type SubtitleEntry ; ~ A single subtitle line. Contains a timing and duration.
 
 	field col.SubtitleColor
 
+	field isCaption%
 	field time#, length# 
 
 	field cooldown#
@@ -61,7 +62,7 @@ Type SubtitleColor ; ~ Settings for subtitle lines. Creates instances for voice 
 
 	field name$
 	field r%, g%, b%
-	field isItalic%, isBold%, isCaption%
+	field isItalic%, isBold%
 	field cooldownLength#
 	field minVolume#
 End Type
@@ -138,7 +139,7 @@ Function LoadSubtitleVoices(path$)
 			Local key$ = Lower(Trim(Left(strtemp, equal-1)))
 			Local value$ = Trim(Right(strtemp, Len(strtemp)-equal))
 
-			ApplySubtitleSetting(key, value, v)
+			ApplySubtitleColorSetting(key, value, v)
 		EndIf
 	Wend
 
@@ -197,6 +198,8 @@ Function CreateSubtitleEntry.SubtitleEntry(key$, value$, isCaption%=False)
 
 	e\col = FindSubtitleVoice("default")
 	e\txt = ParseSubtitleSettings(e, value, isCaption)
+
+	e\isCaption = e\isCaption Or isCaption
 
 	Insert e Before First SubtitleEntry
 	Return e
@@ -283,15 +286,10 @@ Function ParseSubtitleSettings$(e.SubtitleEntry, txt$, isCaption%=False)
 			If (Not parsingKey) Then
 				key = Trim(Lower(key))
 				value = Trim(Lower(value))
-				If key = "length" Then
-					e\length = (Float(value)+1.0) * 70.0
-				Else
-					ApplySubtitleSetting(key, value, c)
-				EndIf
-
+				ApplySubtitleDataSetting(key, value, e)
+				ApplySubtitleColorSetting(key, value, c)
 			EndIf
 
-			c\isCaption = c\isCaption Or isCaption
 			e\col = InternSubtitleColor(c)
 
 			Return Right(txt, Len(txt)-temp)
@@ -305,11 +303,8 @@ Function ParseSubtitleSettings$(e.SubtitleEntry, txt$, isCaption%=False)
 			If char = "," Then
 				key = Trim(Lower(key))
 				value = Trim(Lower(value))
-				If key = "length" Then
-					e\length = (Float(value)+1.0) * 70.0
-				Else
-					ApplySubtitleSetting(key, value, c)
-				EndIf
+				ApplySubtitleDataSetting(key, value, e)
+				ApplySubtitleColorSetting(key, value, c)
 
 				parsingKey = True
 				key = ""
@@ -324,7 +319,21 @@ Function ParseSubtitleSettings$(e.SubtitleEntry, txt$, isCaption%=False)
 	Return txt
 End Function
 
-Function ApplySubtitleSetting(key$, value$, c.SubtitleColor)
+Function ApplySubtitleDataSetting(key$, value$, e.SubtitleEntry)
+	If key = "length" Then
+		e\length = (Float(value)+1.0 * 70.0)
+	EndIf
+
+	If key = "caption" Then
+		If value = "true" Then
+			e\isCaption = True
+		ElseIf value = "false" Then
+			e\isCaption = False
+		EndIf
+	EndIf
+End Function
+
+Function ApplySubtitleColorSetting(key$, value$, c.SubtitleColor)
 	If key = "voice" Then
 		For clr.SubtitleColor = Each SubtitleColor
 			If clr\voiceKey = value And clr <> c Then
@@ -351,13 +360,6 @@ Function ApplySubtitleSetting(key$, value$, c.SubtitleColor)
 			c\isItalic = True
 		ElseIf value = "false" Then
 			c\isItalic = False
-		EndIf
-	EndIf
-	If key = "caption" Then
-		If value = "true" Then
-			c\isCaption = True
-		ElseIf value = "false" Then
-			c\isCaption = False
 		EndIf
 	EndIf
 
@@ -389,7 +391,6 @@ Function CopySubtitleColor(fromColor.SubtitleColor, toColor.SubtitleColor, keepV
 	toColor\b = fromColor\b
 	toColor\isItalic = fromColor\isItalic
 	toColor\isBold = fromColor\isBold
-	toColor\isCaption = fromColor\isCaption
 	toColor\minVolume = fromColor\minVolume
 	toColor\cooldownLength = fromColor\cooldownLength
 End Function
@@ -401,7 +402,6 @@ Function SubtitleColorsMatch%(firstColor.SubtitleColor, secondColor.SubtitleColo
 	If firstColor\b <> secondColor\b Then Return False
 	If firstColor\isItalic <> secondColor\isItalic Then Return False
 	If firstColor\isBold <> secondColor\isBold Then Return False
-	If firstColor\isCaption <> secondColor\isCaption Then Return False
 	If firstColor\minVolume <> secondColor\minVolume Then Return False
 	If firstColor\cooldownLength <> secondColor\cooldownLength Then Return False
 	
@@ -551,7 +551,7 @@ Function QueueSubtitle(soundPath$, soundHandle%, soundChannel%, isStream%=False)
 
 	Local e.SubtitleEntry = found\entry
 	While e <> Null
-		If (Not e\col\isCaption) Or (e\col\isCaption And ClosedCaptionsEnabled) Then
+		If (Not e\isCaption) Or (e\isCaption And ClosedCaptionsEnabled) Then
 			Local queue.QueuedSubtitleMsg = new QueuedSubtitleMsg
 
 			queue\sndHandle = soundHandle
@@ -623,11 +623,13 @@ End Function
 Function ClearSubtitles()
 	Delete Each QueuedSubtitleMsg
 	Delete Each SubtitleMsg
+
+	SubBox\lines = 0
 End Function
 
 
 Function TryCreateSubtitleMsg.SubtitleMsg(queue.QueuedSubtitleMsg, txt$="")
-	If (Not SubtitlesEnabled) Or DeafTimer > 0 Or (queue\entry\col\isCaption And (Not ClosedCaptionsEnabled)) Then
+	If (Not SubtitlesEnabled) Or DeafTimer > 0 Or (queue\entry\isCaption And (Not ClosedCaptionsEnabled)) Then
 		Return Null
 	EndIf
 
