@@ -122,6 +122,7 @@ Function PlaySound_Strict%(sndHandle%)
 						snd\channels[i] = PlaySound(snd\internalHandle)
 					EndIf
 					ChannelVolume snd\channels[i],SFXVolume#
+					QueueSubtitle(snd\name, snd\internalHandle, snd\channels[i])
 					snd\releaseTime = MilliSecs()+5000 ;release after 5 seconds
 					Return snd\channels[i]
 				EndIf
@@ -149,6 +150,7 @@ Function PlaySound_Strict%(sndHandle%)
 					snd\channels[i] = PlaySound(snd\internalHandle)
 				EndIf
 				ChannelVolume snd\channels[i],SFXVolume#
+				QueueSubtitle(snd\name, snd\internalHandle, snd\channels[i])
 				snd\releaseTime = MilliSecs()+5000 ;release after 5 seconds
 				Return snd\channels[i]
 			EndIf
@@ -203,6 +205,7 @@ Function FreeSound_Strict(sndHandle%)
 			FreeSound snd\internalHandle
 			snd\internalHandle = 0
 		EndIf
+		RemoveQueuedSubtitle(snd\internalHandle)
 		Delete snd
 	EndIf
 End Function
@@ -233,6 +236,8 @@ Function StreamSound_Strict(file$,volume#=1.0,custommode=2)
 		Return -1
 	EndIf
 	ChannelVolume(st\chn,volume)
+	QueueSubtitle(file, 0, st\chn, True)
+	UpdateQueuedSubtitleVolume(st\chn, volume, True)
 	Return Handle(st)
 End Function
 
@@ -248,6 +253,7 @@ Function StopStream_Strict(streamHandle%)
 		Return
 	EndIf
 	StopChannel(st\chn)
+	RemoveQueuedSubtitleByChannel(st\chn, True)
 	Delete st
 	
 End Function
@@ -265,6 +271,7 @@ Function SetStreamVolume_Strict(streamHandle%,volume#)
 	EndIf
 	
 	ChannelVolume(st\chn,volume)
+	UpdateQueuedSubtitleVolume(st\chn, volume, True)
 	
 End Function
 
@@ -285,6 +292,7 @@ Function SetStreamPaused_Strict(streamHandle%,paused%)
 	Else
 		ResumeChannel(st\chn)
 	EndIf
+	PauseQueuedSubtitle(st\chn, paused)
 	
 End Function
 
@@ -338,6 +346,7 @@ Function UpdateStreamSoundOrigin(streamHandle%,cam%,entity%,range#=10,volume#=1.
 					
 					SetStreamVolume_Strict(streamHandle,volume#*(1-dist#)*SFXVolume#)
 					SetStreamPan_Strict(streamHandle,panvalue)
+					UpdateQueuedSubtitleVolume(streamHandle, volume#*(1-dist#), True)
 				Else
 					SetStreamVolume_Strict(streamHandle,0.0)
 				EndIf
@@ -406,10 +415,10 @@ Function LoadBrush_Strict(file$,flags,u#=1.0,v#=1.0)
 	Return tmp 
 End Function 
 
-Function LoadFont_Strict(file$, height)
+Function LoadFont_Strict(file$, height, bold%=False, italic%=False)
 	File = DetermineModdedPath(File)
 	If FileType(file$)<>1 Then RuntimeErrorExt "Font " + file$ + " not found."
-	tmp = LoadFont(file, height)
+	tmp = LoadFont(file, height, bold, italic)
 	If tmp = 0 Then RuntimeErrorExt "Failed to load Font: " + file$ 
 	Return tmp
 End Function
