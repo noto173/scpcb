@@ -659,8 +659,7 @@ Function UpdateMainMenu()
 				
 				If MainMenuTab = 3 ;Graphics
 					;[Block]
-					;height = 380 * MenuScale
-					height = 330 * MenuScale
+					height = 380 * MenuScale
 					DrawFrame(x, y, width, height)
 					
 					y=y+20*MenuScale
@@ -729,6 +728,15 @@ Function UpdateMainMenu()
 					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Hudoffset)
 					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=5
 						DrawOptionsTooltip(tx,ty,tw,th,"hudoffset")
+					EndIf
+
+					y=y+50*MenuScale
+
+					ViewBobScale = SlideBar(x + 310*MenuScale, y+6*MenuScale,150*MenuScale, ViewBobScale*100, 6)/100
+					Color 255,255,255
+					Text(x + 20 * MenuScale, y, I_Loc\OptionName_Viewbob)
+					If (MouseOn(x+310*MenuScale,y+6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
+						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
 					EndIf
 
 					y=y+50*MenuScale
@@ -2455,6 +2463,12 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			G = 255
 			B = 255
 			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(HUDOffsetScale*100)), "0")
+		Case "viewbob"
+			txt = I_Loc\OptionTooltip_Viewbob
+			R = 255
+			G = 255
+			B = 255
+			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(ViewBobScale*100)), "100")
 		Case "fov"
 			txt = I_Loc\OptionTooltip_Fov
 			R = 255
