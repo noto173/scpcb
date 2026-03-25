@@ -262,6 +262,8 @@ Global CurrFrameLimit# = (Framelimit%-19)/100.0
 Global ScreenGamma# = GetOptionFloat("graphics", "screengamma")
 ;If Fullscreen Then UpdateScreenGamma()
 
+Global ViewBobScale# = GetOptionFloat("graphics", "view bob")
+
 Global FOV% = GetOptionInt("graphics", "fov")
 Const DEFAULT_FOV% = 59
 
@@ -305,10 +307,6 @@ Global SelectedLoadingScreen.LoadingScreens, LoadingScreenAmount% = 0, LoadingSc
 Global LoadingBack% = LoadImage_Strict("Loadingscreens\loadingback.jpg")
 InitLoadingScreens()
 
-;For some reason, Blitz3D doesn't load fonts that have filenames that
-;don't match their "internal name" (i.e. their display name in applications
-;like Word and such). As a workaround, I moved the files and renamed them so they
-;can load without FastText.
 Font1% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(19 * MenuScale))
 Font2% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(52 * MenuScale))
 Font3% = LoadFont_Strict("GFX\font\DS-DIGI\DS-Digital.ttf", Int(22 * MenuScale))
@@ -4626,8 +4624,8 @@ Function MouseLook()
 		EndIf
 		;EndIf
 		
-		Local up# = (Sin(Shake) / (20.0+CrouchState*20.0))*0.6;, side# = Cos(Shake / 2.0) / 35.0		
-		Local roll# = Max(Min(Sin(Shake/2)*2.5*Min(Injuries+0.25,3.0),8.0),-8.0)
+		Local up# = (Sin(Shake) / (20.0+CrouchState*20.0))*0.6*ViewBobScale;, side# = Cos(Shake / 2.0) / 35.0		
+		Local roll# = Max(Min(Sin(Shake/2)*2.5*Min(Injuries+0.25,3.0),8.0),-8.0)*ViewBobScale
 		
 		;käännetään kameraa sivulle jos pelaaja on vammautunut
 		;RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), Max(Min(up*30*Injuries,50),-50)
@@ -7542,6 +7540,15 @@ Function DrawMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"hudoffset")
 					EndIf
 					UpdateHUDOffsets()
+
+					y=y+50*MenuScale
+
+					ViewBobScale = SlideBar(x + 270*MenuScale, y+6*MenuScale,100*MenuScale, ViewBobScale*100, 6)/100
+					Color 255,255,255
+					Text(x, y, I_Loc\OptionName_Viewbob)
+					If (MouseOn(x+270*MenuScale,y+6*MenuScale,100*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=6
+						DrawOptionsTooltip(tx,ty,tw,th,"viewbob")
+					EndIf
 
 					y=y+50*MenuScale
 
@@ -11340,6 +11347,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "graphics", "enable vram", EnableVRam)
 	PutINIValue(OptionFile, "controls", "mouse smoothing", MouseSmooth)
 	PutINIValue(OptionFile, "graphics", "hud offset", HUDOffsetScale)
+	PutINIValue(OptionFile, "graphics", "view bob", ViewBobScale)
 	PutINIValue(OptionFile, "graphics", "fov", FOV)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
