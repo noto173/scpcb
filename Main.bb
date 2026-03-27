@@ -74,7 +74,7 @@ End Function
 Function GetCLIInt%(name$, def%=0)
 	Local txt$ = GetCLIString(name)
 	If txt <> "" Then Return Int(txt)
-	return def
+	Return def
 End Function
 
 Function GetCLIString$(name$, def$="")
@@ -89,8 +89,8 @@ Function GetCLIString$(name$, def$="")
 	EndIf
 	begin = begin + Len(name)
 	Local end% = Instr(cmd, " ", begin)
-	If end = 0 Then end = Len(cmd) + 1
-	Return Trim(Mid(cmd, begin, end - begin))
+	If End = 0 Then End = Len(cmd) + 1
+	Return Trim(Mid(cmd, begin, End - begin))
 End Function
 
 Include "Blitz_File_FileName.bb"
@@ -213,7 +213,7 @@ If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not IsRestart) And (Not Has
 EndIf
 
 SetGfxDriver(SelectedGFXDriver)
-Global GFXDriverName$ = GFXDriverName(SelectedGFXDriver)
+Global GFXDriverName$ = GfxDriverName(SelectedGFXDriver)
 
 ;New "fake fullscreen" - ENDSHN Psst, it's called borderless windowed mode --Love Mark,
 If BorderlessWindowed
@@ -1020,7 +1020,7 @@ Function UpdateConsole()
 					For rt.RoomTemplates = Each RoomTemplates
 						CreateConsoleMsg("- " + rt\Name)
 					Next
-				Case "spawnitem"
+				Case "spawnitem", "si"
 					;[Block]
 					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					If itt = Null Then
@@ -1102,25 +1102,25 @@ Function UpdateConsole()
 						EndIf
 					Next
 					;[End Block]
-				Case "disable173"
+				Case "disable173", "173off"
 					;[Block]
 					Curr173\Idle = 3 ;This phenominal comment is brought to you by PolyFox. His absolute wisdom in this fatigue of knowledge brought about a new era of 173 state checks.
 					HideEntity Curr173\obj
 					HideEntity Curr173\Collider
 					;[End Block]
-				Case "enable173"
+				Case "enable173", "173on"
 					;[Block]
 					Curr173\Idle = False
 					ShowEntity Curr173\obj
 					ShowEntity Curr173\Collider
 					;[End Block]
-				Case "disable106"
+				Case "disable106", "106off"
 					;[Block]
 					Curr106\Idle = True
 					Curr106\State = 200000
 					Contained106 = True
 					;[End Block]
-				Case "enable106"
+				Case "enable106", "106on"
 					;[Block]
 					Curr106\Idle = False
 					Contained106 = False
@@ -1254,7 +1254,7 @@ Function UpdateConsole()
 					Next
 					CreateConsoleMsg("SCP-096 has not spawned.")
 					;[End Block]
-				Case "debughud"
+				Case "debughud", "dhud"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					Select StrTemp
@@ -1320,7 +1320,7 @@ Function UpdateConsole()
 					EndIf
 					;[End Block]
 				;new Console Commands in SCP:CB 1.3 - ENDSHN
-				Case "infinitestamina","infstam"
+				Case "infinitestamina","infstam","is"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
@@ -1395,7 +1395,7 @@ Function UpdateConsole()
 					
 					RemoteDoorOn = True
 					;[End Block]
-				Case "kill","suicide"
+				Case "kill","suicide","die"
 					;[Block]
 					KillTimer = -1
 					DeathMSG = I_Loc\DeathMessage_Suicide[Rand(4)]
@@ -1447,7 +1447,7 @@ Function UpdateConsole()
 					ResetEntity Camera
 					CreateConsoleMsg("Teleported to coordinates (X|Y|Z): "+EntityX(Collider)+"|"+EntityY(Collider)+"|"+EntityZ(Collider))
 					;[End Block]
-				Case "notarget"
+				Case "notarget","nt"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
@@ -1466,13 +1466,13 @@ Function UpdateConsole()
 						CreateConsoleMsg("NOTARGET ON")	
 					EndIf
 					;[End Block]
-				Case "spawnradio"
+				Case "spawnradio","radio"
 					;[Block]
 					it.Items = CreateItem("fineradio", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
 					EntityType(it\collider, HIT_ITEM)
 					it\state = 101
 					;[End Block]
-				Case "spawnnvg"
+				Case "spawnnvg","nvg"
 					;[Block]
 					it.Items = CreateItem("nvgoggles", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
 					EntityType(it\collider, HIT_ITEM)
@@ -1482,13 +1482,13 @@ Function UpdateConsole()
 					;[Block]
 					CreateConsoleMsg("What pumpkin?")
 					;[End Block]
-				Case "spawnnav"
+				Case "spawnnav","snav"
 					;[Block]
 					it.Items = CreateItem("snavulti", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
 					EntityType(it\collider, HIT_ITEM)
 					it\state = 101
 					;[End Block]
-				Case "teleport173"
+				Case "teleport173","peanut"
 					;[Block]
 					PositionEntity Curr173\Collider,EntityX(Collider),EntityY(Collider)+0.2,EntityZ(Collider)
 					ResetEntity Curr173\Collider
@@ -1560,7 +1560,7 @@ Function UpdateConsole()
 					
 					I_427\Timer = Float(StrTemp)*70.0
 					;[End Block]
-				Case "teleport106"
+				Case "teleport106","larry"
 					;[Block]
 					Curr106\State = 0
 					Curr106\Idle = False
@@ -2505,11 +2505,11 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 						If (Msg=I_Loc\MessageButton_ElevatorAlready) Or (MsgTimer<70*3) Or (ElevatorButtonSpamCount > 20 And Msg <> I_Loc\MessageButton_ElevatorMav)
 							Local rnd%
 							If ElevatorButtonSpamCount > 20 Then
-								rnd = 3
+								Rnd = 3
 							Else
-								rnd = Rand(10)
+								Rnd = Rand(10)
 							EndIf
-							Select rnd
+							Select Rnd
 								Case 1
 									Msg = I_Loc\MessageButton_ElevatorStop
 									MsgTimer = 70 * 7
@@ -2959,7 +2959,7 @@ Global TotalVidMem = TotalVidMem()
 Global TotalPhysMem = TotalPhys()
 
 While IsRunning
-	SetErrorMsg(5, "GPU: " + GFXDriverName + " (" + (TotalVidMem - (AvailVidMem() / 1024)) + "MB/" + TotalVidMem + " MB)")
+	SetErrorMsg(5, "GPU: " + GfxDriverName + " (" + (TotalVidMem - (AvailVidMem() / 1024)) + "MB/" + TotalVidMem + " MB)")
 	SetErrorMsg(6, "Global memory status: (" + (TotalPhysMem - (AvailPhys() / 1024)) + "MB/" + TotalPhysMem + " MB)")
 
 	Cls
@@ -10289,10 +10289,10 @@ Function Load294()
 					row = Int(Trim(Left(section, layerSplitterPos - 1)))
 					layer = Int(Trim(Right(section, Len(section) - layerSplitterPos)))
 				EndIf
-				If row >= Keyboard294Height then
+				If row >= Keyboard294Height Then
 					RuntimeErrorExt("Row " + Str(row) + " out of range.")
 				EndIf
-				If layer >= Keyboard294Layers then
+				If layer >= Keyboard294Layers Then
 					RuntimeErrorExt("Layer " + Str(layer) + " out of range.")
 				EndIf
 			Else
@@ -10321,7 +10321,7 @@ Function Load294()
 					End Select
 				Else
 					Local column = Int(key)
-					If column >= Keyboard294Width then
+					If column >= Keyboard294Width Then
 						RuntimeErrorExt("Column " + Str(column) + " out of range.")
 					EndIf
 					If layer = -1 Then
@@ -10353,14 +10353,16 @@ Function Use294()
 	Color 255, 255, 255
 	Text x+903*HUDScale, y+185*HUDScale, Right(Input294,13), True,True
 	
+	Local key% = GetKey();
+	
 	If temp Then
-		If MouseHit1 Then
+		If MouseHit1 Or key<>0 Then
 			xtemp = Floor((ScaledMouseX()-x-Keyboard294X*HUDScale) / Keyboard294TileWidth / HUDScale)
 			ytemp = Floor((ScaledMouseY()-y-Keyboard294Y*HUDScale) / Keyboard294TileHeight / HUDScale)
 			
 			temp = False
 			
-			If ytemp => 0 And ytemp < Keyboard294Height Then
+			If ytemp => 0 And ytemp < Keyboard294Height And MouseHit1 Then
 				If xtemp => 0 And xtemp < Keyboard294Width Then
 
 					Local oldLayer = Keyboard294ActiveLayer
@@ -10388,11 +10390,25 @@ Function Use294()
 								strtemp = pressedKey
 							EndIf
 					End Select
-
+					
 					If wasKeyPressed And Keyboard294ResetLayerOnInput And oldLayer = Keyboard294ActiveLayer Then Keyboard294ActiveLayer = 0
 
 					If wasKeyPressed PlaySound_Strict ButtonSFX
 				EndIf
+			EndIf
+			
+			If (key >= 48 And key <= 57) Or (key >= 65 And key <= 90) Or (key >= 97 And key <= 122) Or key = 45 Or key = 32 Then ; ascii values for 0-9, a-z, A-Z, -, ., [SPACE]
+				strtemp = Upper(Chr(key))
+				PlaySound_Strict ButtonSFX
+			Else
+				Select key
+					Case 8
+						Input294 = Left(Input294, Max(Len(Input294)-1,0))
+						PlaySound_Strict ButtonSFX
+					Case 13
+						temp = True
+						PlaySound_Strict ButtonSFX
+				End Select
 			EndIf
 			
 			Input294 = Input294 + strtemp
@@ -12101,8 +12117,7 @@ End Function
 
 
 
-
 ;~IDEal Editor Parameters:
-;~F#39#D8#DCD#162D#242C#2B2A
+;~F#39
 ;~B#11E0#145E#1C07
 ;~C#Blitz3D
