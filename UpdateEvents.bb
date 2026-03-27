@@ -2545,6 +2545,7 @@ Function UpdateEvents()
 									EndIf
 									If temp Then
 										If e\EventState2 = 2 Then
+											FlushKeys()
 											Using294=True
 											MouseHit1=False
 										Else If e\EventState2 = 1 And (Not inserted) Then
@@ -9926,8 +9927,6 @@ End Function
 
 
 
-
 ;~IDEal Editor Parameters:
-;~F#A13
-;~B#10D6#1DD5
+;~B#10D7#1DD6
 ;~C#Blitz3D
