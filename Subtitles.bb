@@ -1,6 +1,6 @@
-Global SubtitleFilePath$ = "Data\subtitles.ini"
-Global ClosedCaptionFilePath$ = "Data\subtitles_captions.ini"
-Global VoiceFilePath$ = "Data\voices.ini"
+Const SubtitleFilePath$ = "Data\subtitles.ini"
+Const ClosedCaptionFilePath$ = "Data\subtitles_captions.ini"
+Const VoiceFilePath$ = "Data\voices.ini"
 
 Global Font1Bold% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(19 * MenuScale), True, False)
 Global Font1Italic% = LoadFont_Strict("GFX\font\cour\Courier New.ttf", Int(19 * MenuScale), False, True)
@@ -776,17 +776,6 @@ End Function
 ; ----- UPDATE/DRAW -----
 
 
-Function SubtitleCurveValue#(number#, old#, smooth#, factor#)
-
-	If factor = 0 Then Return old
-	
-	If number < old Then
-		Return Max(old + (number - old) * (1.0 / smooth * factor), number)
-	Else
-		Return Min(old + (number - old) * (1.0 / smooth * factor), number)
-	EndIf
-End Function
-
 Function RecalculateSubtitleBoxTarget()
 	SubBox\targetTop = (SubBox\screenTop + SubtitleTextHeight) - SubtitleTextHeight * Max(SubBox\lines, 1)
 	SubBox\targetHeight = SubtitleTextHeight * Max(SubBox\lines, 1)
@@ -847,18 +836,18 @@ Function UpdateSubtitles(factor#)
 		Else
 			lines = lines + 1
 			Local yPos# = SubBox\targetTop+(SubtitleTextHeight*lines)+9.0
-			c\curYPos = SubtitleCurveValue(yPos, c\curYPos, 7.0, factor)
+			c\curYPos = CurveValue(yPos, c\curYPos, 7.0, factor)
 		EndIf
 	Next
 
 	RecalculateSubtitleBoxTarget()
 	If SubBox\lines>0 Then
-		SubBox\curHeight = SubtitleCurveValue(SubBox\targetHeight, SubBox\curHeight, 7.0, factor)
+		SubBox\curHeight = CurveValue(SubBox\targetHeight, SubBox\curHeight, 7.0, factor)
 		SubBox\curTop = (SubBox\screenTop + SubtitleTextHeight) - SubBox\curHeight
 
-		SubBox\alpha = SubtitleCurveValue(1.0, SubBox\alpha, 7.0, factor)
+		SubBox\alpha = CurveValue(1.0, SubBox\alpha, 7.0, factor)
 	Else
-		SubBox\alpha = SubtitleCurveValue(0.0, SubBox\alpha, 7.0, factor)
+		SubBox\alpha = CurveValue(0.0, SubBox\alpha, 7.0, factor)
 	EndIf
 End Function
 

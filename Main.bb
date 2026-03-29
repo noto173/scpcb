@@ -10950,14 +10950,19 @@ Function Distance#(x1#, y1#, x2#, y2#)
 End Function
 
 
-Function CurveValue#(number#, old#, smooth#)
-	If FPSfactor = 0 Then Return old
+Function CurveValue#(number#, old#, smooth#, factor#)
+
+	If factor = 0 Then Return old
 	
 	If number < old Then
-		Return Max(old + (number - old) * (1.0 / smooth * FPSfactor), number)
+		Return Max(old + (number - old) * (1.0 / smooth * factor), number)
 	Else
-		Return Min(old + (number - old) * (1.0 / smooth * FPSfactor), number)
+		Return Min(old + (number - old) * (1.0 / smooth * factor), number)
 	EndIf
+End Function
+
+Function CurveValue#(number#, old#, smooth#)
+	Return CurveValue(number, old, smooth, FPSfactor)
 End Function
 
 Function CurveAngle#(val#, old#, smooth#)
