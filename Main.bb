@@ -3390,7 +3390,7 @@ While IsRunning
 			EndIf
 		EndIf
 
-		If Using294 Then
+		If Using294 Lor SelectedDoor <> Null Lor SelectedScreen <> Null Then
 			UpdateSubtitles(FPSfactor2)
 		Else
 			UpdateSubtitles(FPSfactor)
