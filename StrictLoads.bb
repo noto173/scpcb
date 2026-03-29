@@ -235,9 +235,8 @@ Function StreamSound_Strict(file$,volume#=1.0,custommode=2)
 		EndIf
 		Return -1
 	EndIf
-	ChannelVolume(st\chn,volume)
 	QueueSubtitle(file, 0, st\chn, True)
-	UpdateQueuedSubtitleVolume(st\chn, volume, True)
+	UpdateChannelVolumeWithSubtitles(st\chn, volume, True, False)
 	Return Handle(st)
 End Function
 
@@ -258,7 +257,7 @@ Function StopStream_Strict(streamHandle%)
 	
 End Function
 
-Function SetStreamVolume_Strict(streamHandle%,volume#)
+Function SetStreamVolume_Strict(streamHandle%,volume#,isSFX%=False)
 	Local st.Stream = Object.Stream(streamHandle)
 	
 	If st = Null
@@ -270,8 +269,7 @@ Function SetStreamVolume_Strict(streamHandle%,volume#)
 		Return
 	EndIf
 	
-	ChannelVolume(st\chn,volume)
-	UpdateQueuedSubtitleVolume(st\chn, volume, True)
+	UpdateChannelVolumeWithSubtitles(st\chn, volume, True, isSFX)
 	
 End Function
 
@@ -292,7 +290,7 @@ Function SetStreamPaused_Strict(streamHandle%,paused%)
 	Else
 		ResumeChannel(st\chn)
 	EndIf
-	PauseQueuedSubtitle(st\chn, paused)
+	SetQueuedSubtitlePause(st\chn, paused)
 	
 End Function
 
@@ -344,9 +342,8 @@ Function UpdateStreamSoundOrigin(streamHandle%,cam%,entity%,range#=10,volume#=1.
 					
 					Local panvalue# = Sin(-DeltaYaw(cam,entity))
 					
-					SetStreamVolume_Strict(streamHandle,volume#*(1-dist#)*SFXVolume#)
+					SetStreamVolume_Strict(streamHandle,volume#*(1-dist#), True)
 					SetStreamPan_Strict(streamHandle,panvalue)
-					UpdateQueuedSubtitleVolume(streamHandle, volume#*(1-dist#), True)
 				Else
 					SetStreamVolume_Strict(streamHandle,0.0)
 				EndIf

@@ -642,6 +642,13 @@ Function RemoveQueuedSubtitleByChannel(soundChannel%, isStream%=False)
 	Next
 End Function
 
+Function UpdateChannelVolumeWithSubtitles(chn%, volume#, isStream%=False, isSFX%=True)
+	Local usedVolume# = volume
+	If isSFX Then usedVolume = usedVolume * SFXVolume
+	ChannelVolume(chn, usedVolume)
+	UpdateQueuedSubtitleVolume(chn, volume, isStream)
+End Function
+
 Function UpdateQueuedSubtitleVolume(soundChannel%, volume#, isStream%=False)
 	If Not SubtitlesEnabled Then
 		Return 
@@ -654,7 +661,17 @@ Function UpdateQueuedSubtitleVolume(soundChannel%, volume#, isStream%=False)
 	Next
 End Function
 
-Function PauseQueuedSubtitle(soundChannel%, paused%)
+Function ResumeChannelWithSubtitles(chn%)
+	ResumeChannel(chn)
+	SetQueuedSubtitlePause(chn, False)
+End Function
+
+Function PauseChannelWithSubtitles(chn%)
+	PauseChannel(chn)
+	SetQueuedSubtitlePause(chn, True)
+End Function
+
+Function SetQueuedSubtitlePause(soundChannel%, paused%)
 	If Not SubtitlesEnabled Then
 		Return 
 	EndIf

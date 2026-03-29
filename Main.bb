@@ -6191,14 +6191,12 @@ Function DrawGUI()
 					
 					If SelectedItem\state > 0 Then
 						If PlayerRoom\RoomTemplate\Name = "pocketdimension" Or CoffinDistance < 4.0 Then
-							ResumeChannel(RadioCHN(5))
-							PauseQueuedSubtitle(RadioCHN(5), False)
+							ResumeChannelWithSubtitles(RadioCHN(5))
 							If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)	
 						Else
 							Select Int(SelectedItem\state2)
 								Case 0 ;randomkanava
-									ResumeChannel(RadioCHN(0))
-									PauseQueuedSubtitle(RadioCHN(0), False)
+									ResumeChannelWithSubtitles(RadioCHN(0))
 									strtemp = "        " + I_Loc\HUD_RadioUsertrack + " - "
 									If (Not EnableUserTracks)
 										If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
@@ -6254,8 +6252,7 @@ Function DrawGUI()
 								Case 1 ;hälytyskanava
 									DebugLog RadioState(1) 
 									
-									ResumeChannel(RadioCHN(1))
-									PauseQueuedSubtitle(RadioCHN(1), False)
+									ResumeChannelWithSubtitles(RadioCHN(1))
 									strtemp = "        " + I_Loc\HUD_RadioCb + "          "
 									If ChannelPlaying(RadioCHN(1)) = False Then
 										
@@ -6270,8 +6267,7 @@ Function DrawGUI()
 									EndIf
 									
 								Case 2 ;scp-radio
-									ResumeChannel(RadioCHN(2))
-									PauseQueuedSubtitle(RadioCHN(2), False)
+									ResumeChannelWithSubtitles(RadioCHN(2))
 									strtemp = "        " + I_Loc\HUD_RadioRadio + "          "
 									If ChannelPlaying(RadioCHN(2)) = False Then
 										RadioState(2)=RadioState(2)+1
@@ -6283,8 +6279,7 @@ Function DrawGUI()
 										EndIf
 									EndIf 
 								Case 3
-									ResumeChannel(RadioCHN(3))
-									PauseQueuedSubtitle(RadioCHN(3), False)
+									ResumeChannelWithSubtitles(RadioCHN(3))
 									strtemp = "             " + I_Loc\HUD_RadioEmergency + "         "
 									If ChannelPlaying(RadioCHN(3)) = False Then RadioCHN(3) = PlaySound_Strict(RadioStatic)
 									
@@ -6336,12 +6331,10 @@ Function DrawGUI()
 										End Select
 									EndIf
 								Case 4
-									ResumeChannel(RadioCHN(6)) ;taustalle kohinaa
-									PauseQueuedSubtitle(RadioCHN(6), False)
+									ResumeChannelWithSubtitles(RadioCHN(6)) ;taustalle kohinaa
 									If ChannelPlaying(RadioCHN(6)) = False Then RadioCHN(6) = PlaySound_Strict(RadioStatic)									
 									
-									ResumeChannel(RadioCHN(4))
-									PauseQueuedSubtitle(RadioCHN(4), False)
+									ResumeChannelWithSubtitles(RadioCHN(4))
 									If ChannelPlaying(RadioCHN(4)) = False Then 
 										If RemoteDoorOn = False And RadioState(8) = False Then
 											RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter3.ogg"))	
@@ -6418,8 +6411,7 @@ Function DrawGUI()
 									
 									
 								Case 5
-									ResumeChannel(RadioCHN(5))
-									PauseQueuedSubtitle(RadioCHN(5), False)
+									ResumeChannelWithSubtitles(RadioCHN(5))
 									If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)
 							End Select 
 							
@@ -6438,8 +6430,7 @@ Function DrawGUI()
 							Text(x+60, y, I_Loc\HUD_RadioChannel)						
 							
 							If SelectedItem\itemtemplate\name = "veryfineradio" Then ;"KOODIKANAVA"
-								ResumeChannel(RadioCHN(0))
-								PauseQueuedSubtitle(RadioCHN(0), False)
+								ResumeChannelWithSubtitles(RadioCHN(0))
 								If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
 								
 								;radiostate(7)=kuinka mones piippaus menossa
@@ -6471,15 +6462,13 @@ Function DrawGUI()
 										If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
 											PlaySound_Strict RadioSquelch
 											If RadioCHN(Int(SelectedItem\state2)) <> 0 Then
-												PauseChannel(RadioCHN(Int(SelectedItem\state2)))
-												PauseQueuedSubtitle(RadioCHN(Int(SelectedItem\state2)), True)
+												PauseChannelWithSubtitles(RadioCHN(Int(SelectedItem\state2)))
 											EndIf
 										EndIf
 										SelectedItem\state2 = i-2
 										;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
 										If RadioCHN(SelectedItem\state2)<>0 Then
-											ResumeChannel(RadioCHN(SelectedItem\state2))
-											PauseQueuedSubtitle(RadioCHN(SelectedItem\state2), False)
+											ResumeChannelWithSubtitles(RadioCHN(SelectedItem\state2))
 										EndIf
 									EndIf
 								Next
@@ -7185,8 +7174,7 @@ Function DrawGUI()
 		For i = 0 To 6
 			If RadioCHN(i) <> 0 Then 
 				If ChannelPlaying(RadioCHN(i)) Then
-					PauseChannel(RadioCHN(i))
-					PauseQueuedSubtitle(RadioCHN(i), True)
+					PauseChannelWithSubtitles(RadioCHN(i))
 				EndIf
 			EndIf
 		Next
@@ -9202,9 +9190,8 @@ Function PlaySound2%(SoundHandle%, cam%, entity%, range# = 10, volume# = 1.0)
 			Local panvalue# = Sin(-DeltaYaw(cam,entity))
 			soundchn% = PlaySound_Strict (SoundHandle)
 			
-			ChannelVolume(soundchn, volume# * (1 - dist#)*SFXVolume#)
+			UpdateChannelVolumeWithSubtitles(soundchn, volume# * (1 - dist#))
 			ChannelPan(soundchn, panvalue)			
-			UpdateQueuedSubtitleVolume(soundchn, volume# * (1 - dist#))
 		EndIf
 	EndIf
 	
@@ -9227,14 +9214,12 @@ Function LoopSound2%(SoundHandle%, Chn%, cam%, entity%, range# = 10, volume# = 1
 				If (Not ChannelPlaying(Chn)) Then Chn% = PlaySound_Strict (SoundHandle)
 			EndIf
 			
-			ChannelVolume(Chn, volume# * (1 - dist#)*SFXVolume#)
+			UpdateChannelVolumeWithSubtitles(Chn, volume# * (1 - dist#))
 			ChannelPan(Chn, panvalue)
-			UpdateQueuedSubtitleVolume(Chn, volume# * (1 - dist#))
 		;EndIf
 	Else
 		If Chn <> 0 Then
-			ChannelVolume (Chn, 0)
-			UpdateQueuedSubtitleVolume(Chn, 0)
+			UpdateChannelVolumeWithSubtitles(Chn, 0)
 		EndIf 
 	EndIf
 	
@@ -9304,16 +9289,14 @@ Function PauseSounds()
 	For e.events = Each Events
 		If e\soundchn <> 0 Then
 			If (Not e\soundchn_isstream)
-				PauseChannel(e\soundchn)
-				PauseQueuedSubtitle(e\soundchn, True)
+				PauseChannelWithSubtitles(e\soundchn)
 			Else
 				SetStreamPaused_Strict(e\soundchn,True)
 			EndIf
 		EndIf
 		If e\soundchn2 <> 0 Then
 			If (Not e\soundchn2_isstream)
-				PauseChannel(e\soundchn2)
-				PauseQueuedSubtitle(e\soundchn2, True)
+				PauseChannelWithSubtitles(e\soundchn2)
 			Else
 				SetStreamPaused_Strict(e\soundchn2,True)
 			EndIf
@@ -9323,16 +9306,14 @@ Function PauseSounds()
 	For n.npcs = Each NPCs
 		If n\soundchn <> 0 Then
 			If (Not n\soundchn_isstream)
-				PauseChannel(n\soundchn)
-				PauseQueuedSubtitle(n\soundchn, True)
+				PauseChannelWithSubtitles(n\soundchn)
 			Else
 				SetStreamPaused_Strict(n\soundchn,True)
 			EndIf
 		EndIf
 		If n\soundchn2 <> 0 Then
 			If (Not n\soundchn2_isstream)
-				PauseChannel(n\soundchn2)
-				PauseQueuedSubtitle(n\soundchn2, True)
+				PauseChannelWithSubtitles(n\soundchn2)
 			Else
 				SetStreamPaused_Strict(n\soundchn2,True)
 			EndIf
@@ -9341,36 +9322,30 @@ Function PauseSounds()
 	
 	For d.doors = Each Doors
 		If d\soundchn <> 0 Then
-			PauseChannel(d\soundchn)
-			PauseQueuedSubtitle(d\soundchn, True)
+			PauseChannelWithSubtitles(d\soundchn)
 		EndIf
 	Next
 	
 	For dem.DevilEmitters = Each DevilEmitters
 		If dem\soundchn <> 0 Then
-			PauseChannel(dem\soundchn)
-			PauseQueuedSubtitle(dem\soundchn, True)
+			PauseChannelWithSubtitles(dem\soundchn)
 		EndIf
 	Next
 	
 	If AmbientSFXCHN <> 0 Then
-		PauseChannel(AmbientSFXCHN)
-		PauseQueuedSubtitle(AmbientSFXCHN, True)
+		PauseChannelWithSubtitles(AmbientSFXCHN)
 	EndIf
 	
 	If BreathCHN <> 0 Then
-		PauseChannel(BreathCHN)
-		PauseQueuedSubtitle(BreathCHN, True)
+		PauseChannelWithSubtitles(BreathCHN)
 	EndIf
 	
 	If CoughCHN <> 0 Then
-		PauseChannel(CoughCHN)
-		PauseQueuedSubtitle(CoughCHN, True)
+		PauseChannelWithSubtitles(CoughCHN)
 	EndIf
 	
 	If VomitCHN <> 0 Then
-		PauseChannel(VomitCHN)
-		PauseQueuedSubtitle(VomitCHN, True)
+		PauseChannelWithSubtitles(VomitCHN)
 	EndIf
 	
 	If IntercomStreamCHN <> 0
@@ -9382,16 +9357,14 @@ Function ResumeSounds()
 	For e.events = Each Events
 		If e\soundchn <> 0 Then
 			If (Not e\soundchn_isstream)
-				ResumeChannel(e\soundchn)
-				PauseQueuedSubtitle(e\soundchn, False)
+				ResumeChannelWithSubtitles(e\soundchn)
 			Else
 				SetStreamPaused_Strict(e\soundchn,False)
 			EndIf
 		EndIf
 		If e\soundchn2 <> 0 Then
 			If (Not e\soundchn2_isstream)
-				ResumeChannel(e\soundchn2)
-				PauseQueuedSubtitle(e\soundchn2, False)
+				ResumeChannelWithSubtitles(e\soundchn2)
 			Else
 				SetStreamPaused_Strict(e\soundchn2,False)
 			EndIf
@@ -9401,16 +9374,14 @@ Function ResumeSounds()
 	For n.npcs = Each NPCs
 		If n\soundchn <> 0 Then
 			If (Not n\soundchn_isstream)
-				ResumeChannel(n\soundchn)
-				PauseQueuedSubtitle(n\soundchn, False)
+				ResumeChannelWithSubtitles(n\soundchn)
 			Else
 				SetStreamPaused_Strict(n\soundchn,False)
 			EndIf
 		EndIf
 		If n\soundchn2 <> 0 Then
 			If (Not n\soundchn2_isstream)
-				ResumeChannel(n\soundchn2)
-				PauseQueuedSubtitle(n\soundchn2, False)
+				ResumeChannelWithSubtitles(n\soundchn2)
 			Else
 				SetStreamPaused_Strict(n\soundchn2,False)
 			EndIf
@@ -9419,36 +9390,30 @@ Function ResumeSounds()
 	
 	For d.doors = Each Doors
 		If d\soundchn <> 0 Then
-			ResumeChannel(d\soundchn)
-			PauseQueuedSubtitle(d\soundchn, False)
+			ResumeChannelWithSubtitles(d\soundchn)
 		EndIf
 	Next
 	
 	For dem.DevilEmitters = Each DevilEmitters
 		If dem\soundchn <> 0 Then
-			ResumeChannel(dem\soundchn)
-			PauseQueuedSubtitle(dem\soundchn, False)
+			ResumeChannelWithSubtitles(dem\soundchn)
 		EndIf
 	Next
 	
 	If AmbientSFXCHN <> 0 Then
-		ResumeChannel(AmbientSFXCHN)
-		PauseQueuedSubtitle(AmbientSFXCHN, False)
+		ResumeChannelWithSubtitles(AmbientSFXCHN)
 	EndIf	
 	
 	If BreathCHN <> 0 Then
-		ResumeChannel(BreathCHN)
-		PauseQueuedSubtitle(BreathCHN, False)
+		ResumeChannelWithSubtitles(BreathCHN)
 	EndIf
 	
 	If CoughCHN <> 0 Then
-		ResumeChannel(CoughCHN)
-		PauseQueuedSubtitle(CoughCHN, False)
+		ResumeChannelWithSubtitles(CoughCHN)
 	EndIf
 	
 	If VomitCHN <> 0 Then
-		ResumeChannel(VomitCHN)
-		PauseQueuedSubtitle(VomitCHN, False)
+		ResumeChannelWithSubtitles(VomitCHN)
 	EndIf
 	
 	If IntercomStreamCHN <> 0
@@ -9609,7 +9574,7 @@ Function GetStepSound(entity%)
     Return 0
 End Function
 
-Function UpdateSoundOrigin2(Chn%, cam%, entity%, range# = 10, volume# = 1.0)
+Function UpdateSoundOrigin(Chn%, cam%, entity%, range# = 10, volume# = 1.0, isSFX = True)
 	If Chn <> 0 Then
 		If ChannelPlaying(Chn) Then
 			range# = Max(range,1.0)
@@ -9621,43 +9586,13 @@ Function UpdateSoundOrigin2(Chn%, cam%, entity%, range# = 10, volume# = 1.0)
 					
 					Local panvalue# = Sin(-DeltaYaw(cam,entity))
 					
-					ChannelVolume(Chn, volume# * (1 - dist#))
+					UpdateChannelVolumeWithSubtitles(Chn, volume# * (1 - dist#), False, isSFX)
 					ChannelPan(Chn, panvalue)
-					UpdateQueuedSubtitleVolume(Chn, volume# * (1 - dist#))
 				Else
-					ChannelVolume (Chn, 0)
-					UpdateQueuedSubtitleVolume(Chn, 0)
+					UpdateChannelVolumeWithSubtitles(Chn, 0)
 				EndIf
 			Else
-				ChannelVolume (Chn, 0)
-				UpdateQueuedSubtitleVolume(Chn, 0)
-			EndIf
-		EndIf
-	EndIf
-End Function
-
-Function UpdateSoundOrigin(Chn%, cam%, entity%, range# = 10, volume# = 1.0)
-	If Chn <> 0 Then
-		If ChannelPlaying(Chn) Then
-			range# = Max(range,1.0)
-			
-			If volume>0 Then
-				
-				Local dist# = EntityDistance(cam, entity) / range#
-				If 1 - dist# > 0 And 1 - dist# < 1 Then
-					
-					Local panvalue# = Sin(-DeltaYaw(cam,entity))
-					
-					ChannelVolume(Chn, volume# * (1 - dist#)*SFXVolume#)
-					ChannelPan(Chn, panvalue)
-					UpdateQueuedSubtitleVolume(Chn, volume# * (1 - dist#))
-				Else
-					ChannelVolume (Chn, 0)
-					UpdateQueuedSubtitleVolume(Chn, 0)
-				EndIf
-			Else
-				ChannelVolume (Chn, 0)
-				UpdateQueuedSubtitleVolume(Chn, 0)
+				UpdateChannelVolumeWithSubtitles(Chn, 0)
 			EndIf
 		EndIf
 	EndIf
