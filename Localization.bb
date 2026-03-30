@@ -77,6 +77,9 @@ Type LocalizationTable
     Field OptionName_Fov$
     Field OptionName_Musicvol$
     Field OptionName_Soundvol$
+    Field OptionName_Localaudio$
+    Field OptionName_Subtitles$
+    Field OptionName_Closedcaptions$
     Field OptionName_Sfxautorelease$
     Field OptionName_Usertrack$
     Field OptionName_Usertrackmode$
@@ -118,6 +121,9 @@ Type LocalizationTable
     Field OptionTooltip_Fov$
     Field OptionTooltip_Musicvol$
     Field OptionTooltip_Soundvol$
+    Field OptionTooltip_Localaudio$
+    Field OptionTooltip_Subtitles$
+    Field OptionTooltip_Closedcaptions$
     Field OptionTooltip_Sfxautorelease$
     Field OptionTooltip_Usertrack$
     Field OptionTooltip_Usertrackmode$
@@ -546,6 +552,9 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "fov" If loc\OptionName_Fov = "" Then loc\OptionName_Fov = value
                             Case "musicvol" If loc\OptionName_Musicvol = "" Then loc\OptionName_Musicvol = value
                             Case "soundvol" If loc\OptionName_Soundvol = "" Then loc\OptionName_Soundvol = value
+                            Case "localaudio" If loc\OptionName_Localaudio = "" Then loc\OptionName_Localaudio = value
+                            Case "subtitles" If loc\OptionName_Subtitles = "" Then loc\OptionName_Subtitles = value
+                            Case "closedcaptions" If loc\OptionName_Closedcaptions = "" Then loc\OptionName_Closedcaptions = value
                             Case "sfxautorelease" If loc\OptionName_Sfxautorelease = "" Then loc\OptionName_Sfxautorelease = value
                             Case "usertrack" If loc\OptionName_Usertrack = "" Then loc\OptionName_Usertrack = value
                             Case "usertrackmode" If loc\OptionName_Usertrackmode = "" Then loc\OptionName_Usertrackmode = value
@@ -590,6 +599,9 @@ Function LoadLocalization(loc.LocalizationTable, file$)
                             Case "fov" If loc\OptionTooltip_Fov = "" Then loc\OptionTooltip_Fov = value
                             Case "musicvol" If loc\OptionTooltip_Musicvol = "" Then loc\OptionTooltip_Musicvol = value
                             Case "soundvol" If loc\OptionTooltip_Soundvol = "" Then loc\OptionTooltip_Soundvol = value
+                            Case "localaudio" If loc\OptionTooltip_Localaudio = "" Then loc\OptionTooltip_Localaudio = value
+                            Case "subtitles" If loc\OptionTooltip_Subtitles = "" Then loc\OptionTooltip_Subtitles = value
+                            Case "closedcaptions" If loc\OptionTooltip_Closedcaptions = "" Then loc\OptionTooltip_Closedcaptions = value
                             Case "sfxautorelease" If loc\OptionTooltip_Sfxautorelease = "" Then loc\OptionTooltip_Sfxautorelease = value
                             Case "usertrack" If loc\OptionTooltip_Usertrack = "" Then loc\OptionTooltip_Usertrack = value
                             Case "usertrackmode" If loc\OptionTooltip_Usertrackmode = "" Then loc\OptionTooltip_Usertrackmode = value

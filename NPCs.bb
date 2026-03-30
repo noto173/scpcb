@@ -4033,7 +4033,7 @@ Function UpdateNPCs()
 				If ChannelPlaying(n\SoundChn2)
 					BlurTimer = Max((5.0-dist)*300,0)
 				EndIf
-				UpdateSoundOrigin2(n\SoundChn2,Camera,n\Collider,20)
+				UpdateSoundOrigin(n\SoundChn2,Camera,n\Collider,20,1.0,False)
 				
 				PositionEntity(n\obj, EntityX(n\Collider), EntityY(n\Collider) - 0.2, EntityZ(n\Collider))
 				

@@ -1200,16 +1200,18 @@ Function UpdateEvents()
 									MoveEntity e\room\NPC[2]\Collider, 0,0,-0.01*FPSfactor
 									
 									;Guard WTF
-									e\room\NPC[0]\State = 12
-									If e\room\NPC[0]\Sound<>0
-										StopChannel(e\room\NPC[0]\SoundChn)
-										FreeSound_Strict(e\room\NPC[0]\Sound)
-										e\room\NPC[0]\Sound = 0
+									If e\room\NPC[0]\State2 <> 0 Then
+										e\room\NPC[0]\State = 12
+										If e\room\NPC[0]\Sound<>0
+											StopChannel(e\room\NPC[0]\SoundChn)
+											FreeSound_Strict(e\room\NPC[0]\Sound)
+											e\room\NPC[0]\Sound = 0
+										EndIf
+										e\room\NPC[0]\Angle = 180
+										e\room\NPC[0]\Sound = LoadSound_Strict("SFX\Room\Intro\Guard\Balcony\WTF"+Rand(1,2)+".ogg")
+										e\room\NPC[0]\SoundChn = PlaySound2(e\room\NPC[0]\Sound,Camera,e\room\NPC[0]\Collider,20)
+										e\room\NPC[0]\State2 = 0
 									EndIf
-									e\room\NPC[0]\Angle = 180
-									e\room\NPC[0]\Sound = LoadSound_Strict("SFX\Room\Intro\Guard\Balcony\WTF"+Rand(1,2)+".ogg")
-									e\room\NPC[0]\SoundChn = PlaySound2(e\room\NPC[0]\Sound,Camera,e\room\NPC[0]\Collider,20)
-									e\room\NPC[0]\State2 = 0
 								Else
 									Animate2(e\room\NPC[1]\obj, AnimTime(e\room\NPC[1]\obj), 0, 19, 0.2, False)
 									If e\room\NPC[2]\Sound=0 Then 

@@ -755,8 +755,9 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 5 ;Audio
 					;[Block]
-					height = 220 * MenuScale
-					DrawFrame(x, y, width, height)	
+					height = 290 * MenuScale
+					If HasDubbedAudio Then height = height + 50*MenuScale
+					DrawFrame(x, y, width, height)
 					
 					y = y + 20*MenuScale
 					
@@ -787,38 +788,42 @@ Function UpdateMainMenu()
 					;	PlayTestSound(False)
 					;EndIf
 					
-					y = y + 30*MenuScale
+					y = y + 50*MenuScale
+
+					If HasDubbedAudio Then
+						Color 255,255,255
+						Text x + 20 * MenuScale, y, I_Loc\OptionName_LocalAudio
+						DubbedAudio = DrawTick(x + 310 * MenuScale, y + MenuScale, DubbedAudio)
+						If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+							DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"localaudio")
+						EndIf
+
+						UsesDubbedAudio = DubbedAudio
+
+						y = y + 50*MenuScale
+					EndIf
 					
 					Color 255,255,255
-					Text x + 20 * MenuScale, y, I_Loc\OptionName_Sfxautorelease
-					EnableSFXRelease = DrawTick(x + 310 * MenuScale, y + MenuScale, EnableSFXRelease)
-					If EnableSFXRelease_Prev% <> EnableSFXRelease
-						If EnableSFXRelease%
-							For snd.Sound = Each Sound
-								For i=0 To 31
-									If snd\channels[i]<>0 Then
-										If ChannelPlaying(snd\channels[i]) Then
-											StopChannel(snd\channels[i])
-										EndIf
-									EndIf
-								Next
-								If snd\internalHandle<>0 Then
-									FreeSound snd\internalHandle
-									snd\internalHandle = 0
-								EndIf
-								snd\releaseTime = 0
-							Next
-						Else
-							For snd.Sound = Each Sound
-								If snd\internalHandle = 0 Then snd\internalHandle = LoadSound_Strict(snd\name)
-							Next
-						EndIf
-						EnableSFXRelease_Prev% = EnableSFXRelease
-					EndIf
+					Text x + 20 * MenuScale, y, I_Loc\OptionName_Subtitles
+					SubtitlesEnabled = DrawTick(x + 310 * MenuScale, y + MenuScale, SubtitlesEnabled)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"sfxautorelease")
+						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"subtitles")
 					EndIf
+
+					If (Not SubtitlesEnabled) Then ClosedCaptionsEnabled = False
+
 					y = y + 30*MenuScale
+
+					Color 255,255,255
+					Text x + 20 * MenuScale, y, I_Loc\OptionName_Closedcaptions
+					ClosedCaptionsEnabled = DrawTick(x + 310 * MenuScale, y + MenuScale, ClosedCaptionsEnabled)
+					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"closedcaptions")
+					EndIf
+
+					If ClosedCaptionsEnabled Then SubtitlesEnabled = True
+
+					y = y + 50*MenuScale
 					
 					Color 255,255,255
 					Text x + 20 * MenuScale, y, I_Loc\OptionName_Usertrack
@@ -2490,6 +2495,14 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			G = 255
 			B = 255
 			txt2 = Format(I_Loc\Option_HintDefault, "%", Str(Int(value*100)), "100")
+		Case "localaudio"
+			txt = I_Loc\OptionTooltip_Localaudio
+			txt2 = I_Loc\Option_HintMenuonly
+			R = 255
+		Case "subtitles"
+			txt = I_Loc\OptionTooltip_Subtitles
+		Case "closedcaptions"
+			txt = I_Loc\OptionTooltip_Closedcaptions
 		Case "sfxautorelease"
 			txt = I_Loc\OptionTooltip_Sfxautorelease
 			R = 255

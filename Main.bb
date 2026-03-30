@@ -116,6 +116,7 @@ Global IsRunning% = True
 Global ShouldRestart% = False
 
 Include "ModManager.bb"
+Global HasDubbedAudio%
 Global ModsEnabled% = GetOptionInt("general", "enable mods") And (Not HasCLIFlag("nomods"))
 If ModsEnabled Then ReloadMods()
 
@@ -125,8 +126,13 @@ Global ConsoleFont%
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX% = LoadSound_Strict("SFX\Interact\Button.ogg")
 
+Global DubbedAudio% = GetOptionInt("audio", "dubbed audio")
+Global UsesDubbedAudio% = DubbedAudio And HasDubbedAudio
+
 Global EnableSFXRelease% = GetOptionInt("audio", "sfx release")
-Global EnableSFXRelease_Prev% = EnableSFXRelease%
+
+Global SubtitlesEnabled% = GetOptionInt("audio", "subtitles")
+Global ClosedCaptionsEnabled% = GetOptionInt("audio", "closed captions")
 
 Global CanOpenConsole% = GetOptionInt("console", "enabled")
 
@@ -206,6 +212,7 @@ For m.ActiveMods = Each ActiveMods
 	If FileType(modPath) = 1 Then LoadLocalization(I_Loc, modPath)
 Next
 LoadLocalization(I_Loc, StringsFile)
+
 
 ; Exclusive fullscreen ONLY supports the reported resolutions
 If (LauncherEnabled Lor HasCLIFlag("launcher")) And (Not IsRestart) And (Not HasCLIFlag("nolauncher")) Lor Fullscreen And (Not GfxMode3DExists(GraphicWidth, GraphicHeight, 32-16*Bit16Mode)) Then
@@ -316,6 +323,9 @@ Font5% = LoadFont_Strict("GFX\font\Journal\Journal.ttf", Int(58 * MenuScale))
 Global CreditsFont%,CreditsFont2%
 
 ConsoleFont% = Font1
+
+Include "Subtitles.bb"
+LoadSubtitles()
 
 SetFont Font2
 
@@ -3495,6 +3505,13 @@ While IsRunning
 				UpdateMenuState()
 			EndIf
 		EndIf
+
+		If Using294 Lor SelectedDoor <> Null Lor SelectedScreen <> Null Then
+			UpdateSubtitles(FPSfactor2)
+		Else
+			UpdateSubtitles(FPSfactor)
+		EndIf
+		DrawSubtitles()
 		
 		DrawGUI()
 		
@@ -3530,10 +3547,13 @@ While IsRunning
 			
 			Local messageOpacity% = Min(MsgTimer / 2, 255)
 			If (Not temp%)
+				; Push text up if subtitles box has lots of text.
+				Local h# = (GraphicHeight / 2) + 200
+				If SubtitlesEnabled Then h = Min(h, SubBox\curTop-SubtitleTextHeight*2)
 				Color 0,0,0
-				Text((GraphicWidth / 2)+1, (GraphicHeight / 2) + 201, Msg, True, False)
+				Text((GraphicWidth / 2)+1, h+1, Msg, True, False)
 				Color messageOpacity, messageOpacity, messageOpacity
-				Text((GraphicWidth / 2), (GraphicHeight / 2) + 200, Msg, True, False)
+				Text((GraphicWidth / 2), h, Msg, True, False)
 			Else
 				Color 0,0,0
 				Text((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, True, False)
@@ -4033,7 +4053,7 @@ Function DrawEnding()
 	End Select
 	
 	ShouldPlay = 66
-	
+
 	Cls
 	
 	If EndingTimer<-200 Then
@@ -4047,6 +4067,9 @@ Function DrawEnding()
 		;EndIf
 		
 		If EndingScreen = 0 Then
+			SubBox\screenTop = GraphicsHeight() * 0.9
+			RecalculateSubtitleBoxTarget()
+
 			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt")
 			
 			ShouldPlay = 23
@@ -4183,7 +4206,11 @@ Function DrawEnding()
 				ShouldPlay = 24
 				DrawCredits()
 			EndIf
-			
+		EndIf
+
+		If EndingTimer > -2000 And SelectedEnding <> "" Then
+			UpdateSubtitles(FPSfactor2)
+			DrawSubtitles()
 		EndIf
 		
 	EndIf
@@ -6280,12 +6307,12 @@ Function DrawGUI()
 					
 					If SelectedItem\state > 0 Then
 						If PlayerRoom\RoomTemplate\Name = "pocketdimension" Or CoffinDistance < 4.0 Then
-							ResumeChannel(RadioCHN(5))
+							ResumeChannelWithSubtitles(RadioCHN(5))
 							If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)	
 						Else
 							Select Int(SelectedItem\state2)
 								Case 0 ;randomkanava
-									ResumeChannel(RadioCHN(0))
+									ResumeChannelWithSubtitles(RadioCHN(0))
 									strtemp = "        " + I_Loc\HUD_RadioUsertrack + " - "
 									If (Not EnableUserTracks)
 										If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
@@ -6341,7 +6368,7 @@ Function DrawGUI()
 								Case 1 ;hälytyskanava
 									DebugLog RadioState(1) 
 									
-									ResumeChannel(RadioCHN(1))
+									ResumeChannelWithSubtitles(RadioCHN(1))
 									strtemp = "        " + I_Loc\HUD_RadioCb + "          "
 									If ChannelPlaying(RadioCHN(1)) = False Then
 										
@@ -6356,7 +6383,7 @@ Function DrawGUI()
 									EndIf
 									
 								Case 2 ;scp-radio
-									ResumeChannel(RadioCHN(2))
+									ResumeChannelWithSubtitles(RadioCHN(2))
 									strtemp = "        " + I_Loc\HUD_RadioRadio + "          "
 									If ChannelPlaying(RadioCHN(2)) = False Then
 										RadioState(2)=RadioState(2)+1
@@ -6368,7 +6395,7 @@ Function DrawGUI()
 										EndIf
 									EndIf 
 								Case 3
-									ResumeChannel(RadioCHN(3))
+									ResumeChannelWithSubtitles(RadioCHN(3))
 									strtemp = "             " + I_Loc\HUD_RadioEmergency + "         "
 									If ChannelPlaying(RadioCHN(3)) = False Then RadioCHN(3) = PlaySound_Strict(RadioStatic)
 									
@@ -6420,10 +6447,10 @@ Function DrawGUI()
 										End Select
 									EndIf
 								Case 4
-									ResumeChannel(RadioCHN(6)) ;taustalle kohinaa
+									ResumeChannelWithSubtitles(RadioCHN(6)) ;taustalle kohinaa
 									If ChannelPlaying(RadioCHN(6)) = False Then RadioCHN(6) = PlaySound_Strict(RadioStatic)									
 									
-									ResumeChannel(RadioCHN(4))
+									ResumeChannelWithSubtitles(RadioCHN(4))
 									If ChannelPlaying(RadioCHN(4)) = False Then 
 										If RemoteDoorOn = False And RadioState(8) = False Then
 											RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter3.ogg"))	
@@ -6500,7 +6527,7 @@ Function DrawGUI()
 									
 									
 								Case 5
-									ResumeChannel(RadioCHN(5))
+									ResumeChannelWithSubtitles(RadioCHN(5))
 									If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)
 							End Select 
 							
@@ -6519,7 +6546,7 @@ Function DrawGUI()
 							Text(x+60, y, I_Loc\HUD_RadioChannel)						
 							
 							If SelectedItem\itemtemplate\name = "veryfineradio" Then ;"KOODIKANAVA"
-								ResumeChannel(RadioCHN(0))
+								ResumeChannelWithSubtitles(RadioCHN(0))
 								If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
 								
 								;radiostate(7)=kuinka mones piippaus menossa
@@ -6550,11 +6577,15 @@ Function DrawGUI()
 									If KeyHit(i) Then
 										If SelectedItem\state2 <> i-2 Then ;pausetetaan nykyinen radiokanava
 											PlaySound_Strict RadioSquelch
-											If RadioCHN(Int(SelectedItem\state2)) <> 0 Then PauseChannel(RadioCHN(Int(SelectedItem\state2)))
+											If RadioCHN(Int(SelectedItem\state2)) <> 0 Then
+												PauseChannelWithSubtitles(RadioCHN(Int(SelectedItem\state2)))
+											EndIf
 										EndIf
 										SelectedItem\state2 = i-2
 										;jos nykyistä kanavaa ollaan soitettu, laitetaan jatketaan toistoa samasta kohdasta
-										If RadioCHN(SelectedItem\state2)<>0 Then ResumeChannel(RadioCHN(SelectedItem\state2))
+										If RadioCHN(SelectedItem\state2)<>0 Then
+											ResumeChannelWithSubtitles(RadioCHN(SelectedItem\state2))
+										EndIf
 									EndIf
 								Next
 								
@@ -7258,7 +7289,9 @@ Function DrawGUI()
 	If SelectedItem = Null Then
 		For i = 0 To 6
 			If RadioCHN(i) <> 0 Then 
-				If ChannelPlaying(RadioCHN(i)) Then PauseChannel(RadioCHN(i))
+				If ChannelPlaying(RadioCHN(i)) Then
+					PauseChannelWithSubtitles(RadioCHN(i))
+				EndIf
 			EndIf
 		Next
 	EndIf
@@ -7719,16 +7752,46 @@ Function DrawMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"soundvol",PrevSFXVolume)
 					EndIf
 					
-					y = y + 30*MenuScale
-					
-					Color 100,100,100
-					Text x, y, I_Loc\OptionName_Sfxautorelease
-					EnableSFXRelease = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableSFXRelease,True)
-					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
-						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"sfxautorelease")
+					y = y + 50*MenuScale
+
+					If HasDubbedAudio Then
+						Color 100,100,100
+						Text x, y, I_Loc\OptionName_LocalAudio
+						DubbedAudio = DrawTick(x + 270 * MenuScale, y + MenuScale, DubbedAudio, True)
+						If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+							DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"localaudio")
+						EndIf
+
+						UsesDubbedAudio = DubbedAudio
+						
+						y = y + 50*MenuScale
 					EndIf
 					
+					Color 255,255,255
+					Text x, y, I_Loc\OptionName_Subtitles
+					Local subtitlesWereEnabled = SubtitlesEnabled
+					SubtitlesEnabled = DrawTick(x + 270 * MenuScale, y + MenuScale, SubtitlesEnabled)
+					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"subtitles")
+					EndIf
+					
+					If (Not SubtitlesEnabled) Then
+						ClosedCaptionsEnabled = False
+						If subtitlesWereEnabled Then ClearSubtitles() : RecalculateSubtitleBoxTarget()
+					EndIf
+
 					y = y + 30*MenuScale
+					
+					Color 255,255,255
+					Text x, y, I_Loc\OptionName_Closedcaptions
+					ClosedCaptionsEnabled = DrawTick(x + 270 * MenuScale, y + MenuScale, ClosedCaptionsEnabled)
+					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
+						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"closedcaptions")
+					EndIf
+
+					If ClosedCaptionsEnabled Then SubtitlesEnabled = True
+					
+					y = y + 50*MenuScale
 					
 					Color 100,100,100
 					Text x, y, I_Loc\OptionName_Usertrack
@@ -8317,6 +8380,8 @@ Function LoadEntities()
 	HideEntity(NVBlink)
 	
 	FogNVTexture = LoadTexture_Strict("GFX\fogNV.jpg", 1)
+
+	LoadSubtitleEntities()
 	
 	DrawLoading(5)
 	
@@ -9293,7 +9358,7 @@ Function PlaySound2%(SoundHandle%, cam%, entity%, range# = 10, volume# = 1.0)
 			Local panvalue# = Sin(-DeltaYaw(cam,entity))
 			soundchn% = PlaySound_Strict (SoundHandle)
 			
-			ChannelVolume(soundchn, volume# * (1 - dist#)*SFXVolume#)
+			UpdateChannelVolumeWithSubtitles(soundchn, volume# * (1 - dist#))
 			ChannelPan(soundchn, panvalue)			
 		EndIf
 	EndIf
@@ -9317,12 +9382,12 @@ Function LoopSound2%(SoundHandle%, Chn%, cam%, entity%, range# = 10, volume# = 1
 				If (Not ChannelPlaying(Chn)) Then Chn% = PlaySound_Strict (SoundHandle)
 			EndIf
 			
-			ChannelVolume(Chn, volume# * (1 - dist#)*SFXVolume#)
+			UpdateChannelVolumeWithSubtitles(Chn, volume# * (1 - dist#))
 			ChannelPan(Chn, panvalue)
 		;EndIf
 	Else
 		If Chn <> 0 Then
-			ChannelVolume (Chn, 0)
+			UpdateChannelVolumeWithSubtitles(Chn, 0)
 		EndIf 
 	EndIf
 	
@@ -9392,14 +9457,14 @@ Function PauseSounds()
 	For e.events = Each Events
 		If e\soundchn <> 0 Then
 			If (Not e\soundchn_isstream)
-				PauseChannel(e\soundchn)
+				PauseChannelWithSubtitles(e\soundchn)
 			Else
 				SetStreamPaused_Strict(e\soundchn,True)
 			EndIf
 		EndIf
 		If e\soundchn2 <> 0 Then
 			If (Not e\soundchn2_isstream)
-				PauseChannel(e\soundchn2)
+				PauseChannelWithSubtitles(e\soundchn2)
 			Else
 				SetStreamPaused_Strict(e\soundchn2,True)
 			EndIf
@@ -9409,14 +9474,14 @@ Function PauseSounds()
 	For n.npcs = Each NPCs
 		If n\soundchn <> 0 Then
 			If (Not n\soundchn_isstream)
-				PauseChannel(n\soundchn)
+				PauseChannelWithSubtitles(n\soundchn)
 			Else
 				SetStreamPaused_Strict(n\soundchn,True)
 			EndIf
 		EndIf
 		If n\soundchn2 <> 0 Then
 			If (Not n\soundchn2_isstream)
-				PauseChannel(n\soundchn2)
+				PauseChannelWithSubtitles(n\soundchn2)
 			Else
 				SetStreamPaused_Strict(n\soundchn2,True)
 			EndIf
@@ -9425,30 +9490,30 @@ Function PauseSounds()
 	
 	For d.doors = Each Doors
 		If d\soundchn <> 0 Then
-			PauseChannel(d\soundchn)
+			PauseChannelWithSubtitles(d\soundchn)
 		EndIf
 	Next
 	
 	For dem.DevilEmitters = Each DevilEmitters
 		If dem\soundchn <> 0 Then
-			PauseChannel(dem\soundchn)
+			PauseChannelWithSubtitles(dem\soundchn)
 		EndIf
 	Next
 	
 	If AmbientSFXCHN <> 0 Then
-		PauseChannel(AmbientSFXCHN)
+		PauseChannelWithSubtitles(AmbientSFXCHN)
 	EndIf
 	
 	If BreathCHN <> 0 Then
-		PauseChannel(BreathCHN)
+		PauseChannelWithSubtitles(BreathCHN)
 	EndIf
 	
 	If CoughCHN <> 0 Then
-		PauseChannel(CoughCHN)
+		PauseChannelWithSubtitles(CoughCHN)
 	EndIf
 	
 	If VomitCHN <> 0 Then
-		PauseChannel(VomitCHN)
+		PauseChannelWithSubtitles(VomitCHN)
 	EndIf
 	
 	If IntercomStreamCHN <> 0
@@ -9460,14 +9525,14 @@ Function ResumeSounds()
 	For e.events = Each Events
 		If e\soundchn <> 0 Then
 			If (Not e\soundchn_isstream)
-				ResumeChannel(e\soundchn)
+				ResumeChannelWithSubtitles(e\soundchn)
 			Else
 				SetStreamPaused_Strict(e\soundchn,False)
 			EndIf
 		EndIf
 		If e\soundchn2 <> 0 Then
 			If (Not e\soundchn2_isstream)
-				ResumeChannel(e\soundchn2)
+				ResumeChannelWithSubtitles(e\soundchn2)
 			Else
 				SetStreamPaused_Strict(e\soundchn2,False)
 			EndIf
@@ -9477,14 +9542,14 @@ Function ResumeSounds()
 	For n.npcs = Each NPCs
 		If n\soundchn <> 0 Then
 			If (Not n\soundchn_isstream)
-				ResumeChannel(n\soundchn)
+				ResumeChannelWithSubtitles(n\soundchn)
 			Else
 				SetStreamPaused_Strict(n\soundchn,False)
 			EndIf
 		EndIf
 		If n\soundchn2 <> 0 Then
 			If (Not n\soundchn2_isstream)
-				ResumeChannel(n\soundchn2)
+				ResumeChannelWithSubtitles(n\soundchn2)
 			Else
 				SetStreamPaused_Strict(n\soundchn2,False)
 			EndIf
@@ -9493,30 +9558,30 @@ Function ResumeSounds()
 	
 	For d.doors = Each Doors
 		If d\soundchn <> 0 Then
-			ResumeChannel(d\soundchn)
+			ResumeChannelWithSubtitles(d\soundchn)
 		EndIf
 	Next
 	
 	For dem.DevilEmitters = Each DevilEmitters
 		If dem\soundchn <> 0 Then
-			ResumeChannel(dem\soundchn)
+			ResumeChannelWithSubtitles(dem\soundchn)
 		EndIf
 	Next
 	
 	If AmbientSFXCHN <> 0 Then
-		ResumeChannel(AmbientSFXCHN)
+		ResumeChannelWithSubtitles(AmbientSFXCHN)
 	EndIf	
 	
 	If BreathCHN <> 0 Then
-		ResumeChannel(BreathCHN)
+		ResumeChannelWithSubtitles(BreathCHN)
 	EndIf
 	
 	If CoughCHN <> 0 Then
-		ResumeChannel(CoughCHN)
+		ResumeChannelWithSubtitles(CoughCHN)
 	EndIf
 	
 	If VomitCHN <> 0 Then
-		ResumeChannel(VomitCHN)
+		ResumeChannelWithSubtitles(VomitCHN)
 	EndIf
 	
 	If IntercomStreamCHN <> 0
@@ -9613,6 +9678,8 @@ Function KillSounds()
 			EndIf
 		Next
 	Next
+
+	ClearSubtitles()
 	
 	DebugLog "Terminated all sounds"
 	
@@ -9675,7 +9742,7 @@ Function GetStepSound(entity%)
     Return 0
 End Function
 
-Function UpdateSoundOrigin2(Chn%, cam%, entity%, range# = 10, volume# = 1.0)
+Function UpdateSoundOrigin(Chn%, cam%, entity%, range# = 10, volume# = 1.0, isSFX = True)
 	If Chn <> 0 Then
 		If ChannelPlaying(Chn) Then
 			range# = Max(range,1.0)
@@ -9687,37 +9754,13 @@ Function UpdateSoundOrigin2(Chn%, cam%, entity%, range# = 10, volume# = 1.0)
 					
 					Local panvalue# = Sin(-DeltaYaw(cam,entity))
 					
-					ChannelVolume(Chn, volume# * (1 - dist#))
+					UpdateChannelVolumeWithSubtitles(Chn, volume# * (1 - dist#), False, isSFX)
 					ChannelPan(Chn, panvalue)
 				Else
-					ChannelVolume (Chn, 0)
+					UpdateChannelVolumeWithSubtitles(Chn, 0)
 				EndIf
 			Else
-				ChannelVolume (Chn, 0)
-			EndIf
-		EndIf
-	EndIf
-End Function
-
-Function UpdateSoundOrigin(Chn%, cam%, entity%, range# = 10, volume# = 1.0)
-	If Chn <> 0 Then
-		If ChannelPlaying(Chn) Then
-			range# = Max(range,1.0)
-			
-			If volume>0 Then
-				
-				Local dist# = EntityDistance(cam, entity) / range#
-				If 1 - dist# > 0 And 1 - dist# < 1 Then
-					
-					Local panvalue# = Sin(-DeltaYaw(cam,entity))
-					
-					ChannelVolume(Chn, volume# * (1 - dist#)*SFXVolume#)
-					ChannelPan(Chn, panvalue)
-				Else
-					ChannelVolume (Chn, 0)
-				EndIf
-			Else
-				ChannelVolume (Chn, 0)
+				UpdateChannelVolumeWithSubtitles(Chn, 0)
 			EndIf
 		EndIf
 	EndIf
@@ -11010,14 +11053,19 @@ Function Distance#(x1#, y1#, x2#, y2#)
 End Function
 
 
-Function CurveValue#(number#, old#, smooth#)
-	If FPSfactor = 0 Then Return old
+Function CurveValue#(number#, old#, smooth#, factor#)
+
+	If factor = 0 Then Return old
 	
 	If number < old Then
-		Return Max(old + (number - old) * (1.0 / smooth * FPSfactor), number)
+		Return Max(old + (number - old) * (1.0 / smooth * factor), number)
 	Else
-		Return Min(old + (number - old) * (1.0 / smooth * FPSfactor), number)
+		Return Min(old + (number - old) * (1.0 / smooth * factor), number)
 	EndIf
+End Function
+
+Function CurveValue#(number#, old#, smooth#)
+	Return CurveValue(number, old, smooth, FPSfactor)
 End Function
 
 Function CurveAngle#(val#, old#, smooth#)
@@ -11489,6 +11537,9 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "audio", "sfx release", EnableSFXRelease)
 	PutINIValue(OptionFile, "audio", "enable user tracks", EnableUserTracks%)
 	PutINIValue(OptionFile, "audio", "user track setting", UserTrackMode%)
+	PutINIValue(OptionFile, "audio", "dubbed audio", DubbedAudio)
+	PutINIValue(OptionFile, "audio", "subtitles", SubtitlesEnabled)
+	PutIniValue(OptionFile, "audio", "closed captions", ClosedCaptionsEnabled)
 	
 	PutINIValue(OptionFile, "binds", "Right key", KEY_RIGHT)
 	PutINIValue(OptionFile, "binds", "Left key", KEY_LEFT)
@@ -11766,6 +11817,8 @@ Function RenderWorld2()
 			SetFont Font1
 		EndIf
 	EndIf
+
+	RenderSubtitles()
 
 	CatchErrors("RenderWorld2")
 End Function
