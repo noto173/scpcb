@@ -97,6 +97,7 @@ Include "Blitz_File_FileName.bb"
 
 Include "DevilParticleSystem.bb"
 
+Global SteamLastStatus%
 Global SteamActive% = GetOptionInt("general", "enable steam") And (Not HasCLIFlag("nosteam"))
 If SteamActive Then
 	If Steam_RestartAppIfNecessary(2178380) Then Return
@@ -109,6 +110,9 @@ If DiscordActive Then
 	DiscordActive = (BlitzcordCreateCore("1465275739342377014") = 0)
 	If DiscordActive Then BlitzcordSetLargeImage("logo")
 EndIf
+
+; Used for rich presence
+Global PlayerArea%
 
 Global IsRestart% = False
 .Start
@@ -3626,19 +3630,50 @@ While IsRunning
 	
 	CatchErrors("Main loop / uncaught")
 
-	If SteamActive Then Steam_Update()
+	If SteamActive Lor DiscordActive Then
+		PlayerArea = GetCurrentPlayerArea()
+	EndIf
+
+	Local newAreaStr$
+	If SteamActive Then
+		If SteamLastStatus <> PlayerArea Then
+			Local displayBase$
+			If PlayerArea = -1 Then
+				Steam_SetRichPresence("steam_display", "#StatusMenus")
+			Else If SteamLastStatus = -1 Then
+				Steam_SetRichPresence("steam_display", "#StatusGame")
+				Steam_SetRichPresence("difficulty", SelectedDifficulty\name)
+			EndIf
+			Select PlayerArea
+				Case -1 newAreaStr = "Menu"
+				Case 0 newAreaStr = "LCZ"
+				Case 1 newAreaStr = "HCZ"
+				Case 2 newAreaStr = "EZ"
+				Case 3 newAreaStr = "jorge"
+				Case 4 newAreaStr = "intro"
+				Case 5 newAreaStr = "860"
+				Case 100 newAreaStr = "1499"
+				Case 101 newAreaStr = "PD"
+				Case 102 newAreaStr = "GateA"
+				Case 103 newAreaStr = "GateB"
+				Case 104 newAreaStr = "MT"
+			End Select
+			Steam_SetRichPresence("gamestatus", newAreaStr)
+			SteamLastStatus = PlayerArea
+		EndIf
+
+		Steam_Update()
+	EndIf
+
 	If DiscordActive Then
-		If MilliSecs() > DiscordCooldown Then
-			If MainMenuOpen Then
-				If DiscordLastStatus <> -1 Then
-					BlitzcordSetActivityDetails("Browsing the menus")
-					BlitzcordSetLargeText("")
-					BlitzcordSetSmallImage("")
-					BlitzcordSetTimestampStart(BlitzcordGetCurrentTimestamp())
-					BlitzcordUpdateActivity()
-					DiscordCooldown = MilliSecs() + 5000
-					DiscordLastStatus = -1
-				EndIf
+		If PlayerArea <> DiscordLastStatus And MilliSecs() > DiscordCooldown Then
+			If PlayerArea = -1 Then
+				BlitzcordSetActivityDetails("Browsing the menus")
+				BlitzcordSetLargeText("")
+				BlitzcordSetSmallImage("")
+				BlitzcordSetTimestampStart(BlitzcordGetCurrentTimestamp())
+				BlitzcordUpdateActivity()
+				DiscordCooldown = MilliSecs() + 5000
 			Else
 				If DiscordLastStatus = -1 Then
 					BlitzcordSetLargeText(GetSeedString(False))
@@ -3647,37 +3682,26 @@ While IsRunning
 					BlitzcordSetTimestampStart(BlitzcordGetCurrentTimestamp())
 				EndIf
 
-				Local newArea% = PlayerZone
-				Select PlayerRoom\RoomTemplate\Name
-					Case "173" newArea = 4
-					Case "dimension1499" newArea = 100
-					Case "pocketdimension" newArea = 101
-					Case "gatea" newArea = 102
-					Case "exit1" newArea = 103
-					Case "room2tunnel" If EntityY(Collider,True)>4.0 Then newArea = 104
+				Select PlayerArea
+					Case 0 newAreaStr = "Roaming the Light Containment Zone"
+					Case 1 newAreaStr = "Roaming the Heavy Containment Zone"
+					Case 2 newAreaStr = "Roaming the Entrance Zone"
+					Case 3 newAreaStr = "jorge has been expecting you"
+					Case 4 newAreaStr = "Being tested on SCP-173"
+					Case 5 newAreaStr = "Traversing a blue-hued forest"
+					Case 100 newAreaStr = "Wearing a GP-5 Gas Mask"
+					Case 101 newAreaStr = "Trapped in the Pocket Dimension"
+					Case 102 newAreaStr = "Escaping through Gate A"
+					Case 103 newAreaStr = "Escaping through Gate B"
+					Case 104 newAreaStr = "Lost in the Maintenance Tunnels"
 				End Select
-				If newArea <> DiscordLastStatus Then
-					Local newAreaStr$
-					Select newArea
-						Case 0 newAreaStr = "Roaming the Light Containment Zone"
-						Case 1 newAreaStr = "Roaming the Heavy Containment Zone"
-						Case 2 newAreaStr = "Roaming the Entrance Zone"
-						Case 3 newAreaStr = "jorge has been expecting you"
-						Case 4 newAreaStr = "Being tested on SCP-173"
-						Case 5 newAreaStr = "Traversing a blue-hued forest"
-						Case 100 newAreaStr = "Wearing a GP-5 Gas Mask"
-						Case 101 newAreaStr = "Trapped in the Pocket Dimension"
-						Case 102 newAreaStr = "Escaping through Gate A"
-						Case 103 newAreaStr = "Escaping through Gate B"
-						Case 104 newAreaStr = "Lost in the Maintenance Tunnels"
-					End Select
-					BlitzcordSetActivityDetails(newAreaStr)
-					BlitzcordUpdateActivity()
-					DiscordCooldown = MilliSecs() + 5000
-					DiscordLastStatus = newArea
-				EndIf
+				BlitzcordSetActivityDetails(newAreaStr)
+				BlitzcordUpdateActivity()
+				DiscordCooldown = MilliSecs() + 5000
 			EndIf
+			DiscordLastStatus = PlayerArea
 		EndIf
+
 		BlitzcordRunCallbacks()
 	EndIf
 
@@ -3699,6 +3723,19 @@ Function Restart()
 	ClearLoadedINIFiles()
 	IsRunning = False
 	ShouldRestart = True
+End Function
+
+Function GetCurrentPlayerArea%()
+	If MainMenuOpen Then Return -1
+	Select PlayerRoom\RoomTemplate\Name
+		Case "173" Return 4
+		Case "dimension1499" Return 100
+		Case "pocketdimension" Return 101
+		Case "gatea" Return 102
+		Case "exit1" Return 103
+		Case "room2tunnel" If EntityY(Collider,True)>4.0 Then Return 104
+		Default Return PlayerZone
+	End Select
 End Function
 
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
