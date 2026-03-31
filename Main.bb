@@ -813,7 +813,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("Spawns an NPC at the player's location.")
 							CreateConsoleMsg("Valid parameters are:")
 							CreateConsoleMsg("008zombie / 049 / 049-2 / 066 / 096 / 106 / 173")
-							CreateConsoleMsg("/ 178-1 / 372 / 513-1 / 966 / 1499-1 / class-d")
+							CreateConsoleMsg("/ 372 / 513-1 / 966 / 1048-a / 1499-1 / class-d")
 							CreateConsoleMsg("/ guard / mtf / apache / tentacle")
 							CreateConsoleMsg("******************************")
 						Case "revive","undead","resurrect"
