@@ -1079,17 +1079,22 @@ Function UpdateConsole()
 					Next
 				Case "spawnitem"
 					;[Block]
-					Local itt.ItemTemplates = FindItemTemplate(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Local itemCountStr$ = Piece(ConsoleInput, 3, " ")
+					Local itemCount% = 1
+					If itemCountStr <> 0 Then itemCount = Int(itemCountStr)
+					Local itt.ItemTemplates = FindItemTemplate(Piece(ConsoleInput, 2, " "))
 					If itt = Null Then
 						CreateConsoleMsg("Item not found.",255,150,0)
 					Else
 						CreateConsoleMsg(itt\displayname + " spawned.")
-						it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
-						EntityType(it\collider, HIT_ITEM)
+						For i = 0 To itemCount
+							it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+							EntityType(it\collider, HIT_ITEM)
 
-						If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
-							it\state = 101
-						EndIf
+							If itt\name = "snavulti" Lor itt\name = "fineradio" Lor itt\name = "veryfineradio" Then
+								it\state = 101
+							EndIf
+						Next
 					End If
 					;[End Block]
 				Case "itemlist", "items"
