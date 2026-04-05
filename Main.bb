@@ -704,7 +704,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("- notarget")
 							CreateConsoleMsg("- teleport [room name] [index]")
 							CreateConsoleMsg("- roomlist")
-							CreateConsoleMsg("- spawnitem [item name]")
+							CreateConsoleMsg("- spawnitem [item name] [count]")
 							CreateConsoleMsg("- itemlist")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Use "+Chr(34)+"help 2/3"+Chr(34)+" to find more commands.")
@@ -736,6 +736,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("- showfps")
 							CreateConsoleMsg("- debughud")
 							CreateConsoleMsg("- camerafog [near] [far]")
+							CreateConsoleMsg("- viewbob [value]")
 							CreateConsoleMsg("- fov [value]")
 							CreateConsoleMsg("- gamma [value]")
 							CreateConsoleMsg("- playmusic [clip + .wav/.ogg]")
@@ -800,6 +801,8 @@ Function UpdateConsole()
 							CreateConsoleMsg("Spawns an item at the player's location.")
 							CreateConsoleMsg("Any name that can appear in your inventory")
 							CreateConsoleMsg("is a valid parameter.")
+							CreateConsoleMsg("The quantity of the item to be spawned can")
+							CreateConsoleMsg("optionally be specified as the second parameter.")
 							CreateConsoleMsg("Example: spawnitem Key Card Omni")
 							CreateConsoleMsg("******************************")
 						Case "itemlist", "items"
@@ -988,6 +991,12 @@ Function UpdateConsole()
 						CreateConsoleMsg("******************************")							
 					EndIf
 					;[End Block]
+				Case "viewbob"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+
+					ViewBobScale = Float(StrTemp)
+					;[End Block]
 				Case "fov"
 					;[Block]
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
@@ -1081,13 +1090,17 @@ Function UpdateConsole()
 					;[Block]
 					Local itemCountStr$ = Piece(ConsoleInput, 3, " ")
 					Local itemCount% = 1
-					If itemCountStr <> 0 Then itemCount = Int(itemCountStr)
+					If itemCountStr <> "" Then itemCount = Int(itemCountStr)
 					Local itt.ItemTemplates = FindItemTemplate(Piece(ConsoleInput, 2, " "))
 					If itt = Null Then
 						CreateConsoleMsg("Item not found.",255,150,0)
 					Else
-						CreateConsoleMsg(itt\displayname + " spawned.")
-						For i = 0 To itemCount
+						If itemCount <> 1 Then 
+							CreateConsoleMsg(itemCount + " " + itt\displayname + " spawned.")
+						Else
+							CreateConsoleMsg(itt\displayname + " spawned.")
+						EndIf
+						For i = 0 To itemCount-1
 							it.Items = CreateItem(itt\name, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
 							EntityType(it\collider, HIT_ITEM)
 
@@ -1782,20 +1795,16 @@ End Function
 
 ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
 CreateConsoleMsg("Console commands: ")
+CreateConsoleMsg("  - help [1-3]")
 CreateConsoleMsg("  - teleport [room name]")
 CreateConsoleMsg("  - godmode [on/off]")
 CreateConsoleMsg("  - noclip [on/off]")
-CreateConsoleMsg("  - noclipspeed [x] (default = 2.0)")
-CreateConsoleMsg("  - wireframe [on/off]")
-CreateConsoleMsg("  - debughud [on/off]")
 CreateConsoleMsg("  - camerafog [near] [far]")
+CreateConsoleMsg("  - showmap [on/off/2]")
 CreateConsoleMsg(" ")
-CreateConsoleMsg("  - status")
 CreateConsoleMsg("  - heal")
-CreateConsoleMsg(" ")
 CreateConsoleMsg("  - spawnitem [item name]")
 CreateConsoleMsg(" ")
-CreateConsoleMsg("  - 173speed [x] (default = 35)")
 CreateConsoleMsg("  - disable173/enable173")
 CreateConsoleMsg("  - disable106/enable106")
 CreateConsoleMsg("  - 173state/106state/096state")
